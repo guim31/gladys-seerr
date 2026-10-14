@@ -16,8 +16,9 @@ its only runtime dependency. It started from the official JavaScript template.
 ```bash
 npm install
 npm test                                  # node --test, the built-in runner
-node --test test/devices.test.js          # one file
-node --test --test-name-pattern "plug"    # tests whose name matches
+node --test test/hub.test.js              # one file
+node --test --test-name-pattern "issue"   # tests whose name matches
+npm run test:real                         # against a real server (skipped without SEERR_URL)
 npm run lint                              # ESLint
 npm run format:check                      # Prettier, as the CI runs it
 npm run format                            # Prettier, fix in place
@@ -32,15 +33,23 @@ pushing.
 
 ```
 index.js                          SDK wiring only: handlers registered before connect()
-src/devices/index.js              registry of the device blueprints + dispatch helpers
-src/devices/<type>.js             one device type per file (buildDevice, onPoll, onSetValue...)
+src/app.js                        registers every SDK handler on the hub (shared with the tests)
+src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults), slots, URL parsing
+src/hub.js                        one record per server: timer, gated reads, states, scene events, commands
+src/devices.js                    one device per server: features, names (4 languages), external ids
+src/seerr/client.js               Overseerr/Jellyseerr/Seerr API v1 client (X-Api-Key), error kinds, posters
+src/seerr/model.js                pure parsers: counts, requests and their state, issues, TMDB details
+src/seerr/http.js                 the only network function (node:http/https), the test seam
+src/widgets.js                    "Media requests" widget (list with posters, approve/decline buttons)
 src/scenes.js                     scene action handlers (manifest `scene_actions`)
-src/widgets.js                    dashboard widget handlers (manifest `widgets`)
-src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults) + normalization
-src/weather.js                    example driver (Open-Meteo)
-gladys-assistant-integration.json manifest: name, config_schema, actions, image...
-docs/en.md, docs/fr.md            user documentation, re-hosted by Gladys (mandatory)
-test/                             node --test, against the SDK's fake Gladys (integration-sdk/testing)
+src/texts.js                      messages in en/fr/de/es
+src/store.js                      /data/seerr-state.json: last request/issue seen, requests waiting
+gladys-assistant-integration.json manifest: name, config_schema, actions, triggers, widget...
+docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys, same sections
+test/                             node --test, fake servers (test/helpers) + the SDK's fake Gladys
+test/real/                        optional test against a real server (npm run test:real)
+scripts/real/                     seeds a real Overseerr/Jellyseerr/Seerr in Docker for test:real
+scripts/probe.mjs                 read-only probe of a real server, through the client
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
 ```
 
@@ -70,8 +79,10 @@ test/                             node --test, against the SDK's fake Gladys (in
   `type: "provider"`: 5.1.0). `test/manifest.test.js` ties the manifest to the
   code (defaults, action, scene and widget handlers): change both sides
   together.
-- **User-facing text** is bilingual (English and French): action messages,
-  manifest texts, and `docs/en.md` / `docs/fr.md`, kept in sync.
+- **User-facing text** exists in four languages (English, French, German with
+  "du", Spanish with "usted"): action messages, manifest texts, widget texts,
+  feature names, and `docs/{en,fr,de,es}.md` with the same sections, kept in
+  sync. `test/i18n.test.js` checks it.
 - **Style.** Prettier formats, ESLint catches mistakes. Comments explain why,
   in English. Tests never touch the network.
 
@@ -233,3 +244,48 @@ long, et sur un « Sie »/« Ihr… » de politesse en allemand. Le store exige 
 - Docs `en`, `fr`, `de`, `es` avec les mêmes sections.
 - Chauffe, ouverture, sécurité : ne rien rendre pilotable « comme un thermostat » ou par un assistant
   vocal quand une erreur serait dangereuse (leçon d'OctoPrint).
+
+## Overseerr / Jellyseerr : propre à cette intégration
+
+- **Une API pour trois applications** : Overseerr (Plex), Jellyseerr (fork) et Seerr (leur fusion, 3.x)
+  servent la même API v1 (`/api/v1/…`, en-tête `X-Api-Key`). Vérifié le 14/10/2026 sur les images officielles
+  `sctx/overseerr` (1.35.0), `fallenbagel/jellyseerr` (2.7.3, marquée « deprecated » : le projet est devenu
+  Seerr) et `seerr/seerr` (3.5.0, conteneur non root : le dossier de config doit lui être inscriptible). La clé
+  agit comme le premier administrateur. Mauvaise clé : 403 ; pas de clé : 401 (`cookie 'connect.sid'
+required`) ; route inconnue : 404 **en JSON** (pas « pas une API »). `/status` et `/settings/public` répondent
+  sans clé.
+- **Instance de test sans Plex/Jellyfin ni TMDB** (`scripts/real/`) : premier démarrage pour créer la base,
+  arrêt, insertion SQLite (`node:sqlite`) d'utilisateurs, médias, demandes et d'un problème, `settings.json`
+  (`public.initialized`, `main.apiKey`) puis redémarrage. Ne pas toucher `mediaServerType` : Jellyfin sans adresse
+  fait échouer une migration au démarrage. Le proxy de la session refuse TMDB : `/movie/:id`, `/tv/:id` et
+  `/imageproxy` répondent 500, ce que fait aussi un serveur sans Internet (titre de repli « Film n° 550 »).
+- **`/request` ne donne pas le titre** : seulement `media.tmdbId`. Titre, année et affiche viennent de
+  `/movie/:id` ou `/tv/:id?language=xx` (≈ 70 à 90 Ko), lus pour les 8 demandes du widget et les événements
+  seulement, gardés en mémoire (300 au plus), un échec retenté après 10 min.
+- **Chaque `GET /request` interroge tous les Sonarr/Radarr configurés** (profils de qualité). D'où la lecture
+  gardée : `/request/count` + `/issue/count` à chaque cycle, les listes seulement quand ces compteurs bougent, et
+  toutes les 10 min (l'arrivée d'une saison ne les bouge pas).
+- **Compteurs** : `available` d'Overseerr/Jellyseerr = approuvées dont le média est disponible ; Seerr passe ces
+  demandes en `COMPLETED` (5) et les compte dans `completed` → disponibles = `available + completed`. Aucun
+  compteur d'échecs : `/request?filter=failed&take=1` → `pageInfo.results`. Le filtre `available` de
+  `/request` exige `COMPLETED` : vide sur Overseerr, ne pas s'en servir.
+- **Overseerr ignore `mediaType`** sur `/request` (Jellyseerr et Seerr le lisent) : filtrer côté intégration.
+- **Une série « disponible »** : toutes les saisons de la demande (`seasons[].seasonNumber`) au statut 5 dans
+  `media.seasons`, que seule la réponse de `/request/:id` contient (la liste les omet). Statut de média 4
+  (partiel) peut durer toujours (série en cours) : vérifier saison par saison, une fois par changement de
+  `media.updatedAt`/`lastSeasonChange`. Une demande 4K suit `status4k`.
+- **Commentaires des problèmes** : dans la liste `/issue` sur Seerr seulement ; Overseerr et Jellyseerr exigent
+  `/issue/:id` pour le message.
+- **Approbation** : `POST /request/:id/approve|decline`, sans corps. Overseerr et Jellyseerr acceptent
+  d'approuver une demande refusée ; Seerr répond 409 (`Only pending requests…`). Le bouton du widget relit la
+  demande avant d'agir (carte périmée → « n'est plus en attente »).
+- **`POST /media/:id/available`** (test réel) : Seerr exige `content-type: application/json` (415 sinon).
+- **Affiches** : `/imageproxy/tmdb/t/p/w185/<chemin>` sur Jellyseerr/Seerr, `/imageproxy/t/p/w185/<chemin>` sur
+  Overseerr (qui envoie `/tmdb/…` tel quel à TMDB) : la route qui marche est retenue par client. Sans clé.
+- **Le nom de l'appareil** vient de `/settings/public` (`applicationTitle`, modifiable par l'administrateur)
+  quand l'utilisateur n'en a pas saisi ; l'appareil est republié si ce titre change.
+- **`displayName`** retombe sur l'adresse e-mail chez Overseerr : on n'en garde que la partie avant `@`.
+- **Piège du client** : une propriété d'instance `this.request` (le seam HTTP) masquait la méthode `request(id)`.
+  Le seam s'appelle `this.http`.
+- **Budget du widget** : 3 tuiles + liste + statut + légende + 2 boutons = 8. Une 4ᵉ tuile (« disponibles ») ferait
+  jeter un bouton : les disponibles restent visibles par leur badge et sur l'appareil.

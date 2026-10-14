@@ -30,6 +30,26 @@ Gladys before reporting a problem.
 
 In scope: the code of this repository and the Docker image it publishes.
 
+What the integration handles:
+
+- **Secrets**: the API keys of the servers are `secret` fields of the Gladys
+  configuration. The integration reads them from Gladys at startup, keeps them
+  in memory, sends them only to the server they belong to (in the `X-Api-Key`
+  header, never in a URL), and never writes them to `/data` nor to the logs. An
+  API key acts as the administrator of its server.
+- **Stored in `/data`**: `seerr-state.json`, per server its address, the
+  numbers of the newest request and issue seen and the numbers of the requests
+  waiting for their media. No title, no user name, no key.
+- **Network**: requests go only to the addresses typed in the configuration,
+  on the local network, in HTTP or HTTPS (certificates verified unless "Accept
+  self-signed certificates" is ticked). Titles and posters are read from these
+  servers, never from the Internet. The integration opens no port and calls no
+  cloud service.
+- **Changes made to the servers**: only approving or declining a request, and
+  only when "Allow approving and declining" is ticked (off by default). Nothing
+  is ever deleted.
+
 Out of scope: Gladys Assistant itself (see its
 [security policy](https://github.com/GladysAssistant/Gladys/security/policy)),
-and the third-party services and devices the integration talks to.
+Overseerr, Jellyseerr and Seerr themselves, and the other devices and services
+of your network.

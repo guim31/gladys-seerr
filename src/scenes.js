@@ -1,41 +1,36 @@
 // -----------------------------------------------------------------------------
-// Scene actions (SDK v0.14+, Gladys 5.1+).
+// Scene action handlers (manifest `scene_actions`, Gladys 5.1+).
 //
-// A scene action is an OPERATION a scene author places in a scene, with
-// parameters and a result: "identify this device", "take a snapshot", "clean
-// these rooms". Each one is declared in the manifest `scene_actions` field
-// (key, label, `fields` in the config_schema grammar, scalar `outputs`) and
-// handled here, keyed by that same `key`; index.js registers every entry with
-// `gladys.onSceneAction(key, ...)`.
+// Approve or decline the newest request awaiting approval, on one server or
+// any, for movies, series or both. Off unless the configuration allows it
+// (the action then fails with a message saying where to turn it on). Nothing
+// destructive: a declined request can still be approved in Overseerr.
 //
-// Scene TRIGGERS are the other direction ("this happened"): they are fired by
-// the device that observes the event, see src/devices/motionSensor.js.
-//
-// The rules that matter:
-//   - `fields` arrive RESOLVED: scene variables substituted, defaults applied,
-//     validated by the core; a `"source": "devices"` field is the chosen
-//     device external_id;
-//   - resolve an object of the declared `outputs` (scalars only), readable by
-//     the following actions of the scene, or `undefined` for none. Keys not
-//     declared in the manifest are dropped by the core;
-//   - throwing fails THIS action only: the scene logs it and continues. A
-//     scene action is never a condition: return an output and let the scene
-//     author gate on it;
-//   - never fire a scene event as a consequence of a received action: a scene
-//     bound to that event would loop through the integration.
+// No request awaiting approval is not an error: the outputs say so (`done`
+// false), and the scene author gates the next actions on it.
 // -----------------------------------------------------------------------------
 
-import { createLogger } from '@gladysassistant/integration-sdk';
-import { signalDevice } from './devices/index.js';
+import { MEDIA_TEXT, pick } from './texts.js';
 
-const logger = createLogger({ name: 'scenes' });
+async function decide(hub, fields, approve) {
+  const result = await hub.decideLatest(fields.device || null, fields.media_type || null, approve);
+  if (!result) {
+    return { done: false, title: '', requested_by: '', media_type: '' };
+  }
+  return {
+    done: true,
+    title: result.title,
+    requested_by: result.requestedBy ?? '',
+    media_type: pick(MEDIA_TEXT[result.mediaType], hub.config.language),
+  };
+}
 
 export const SCENE_ACTIONS = {
-  // The ack is awaited under the action's `timeout_seconds` (15 s in the
-  // manifest), counted from the moment the scene reaches the action.
-  async identify_device(gladys, { fields, config }) {
-    logger.info(`Scene action identify_device <- ${fields.device}`);
-    const signalled = await signalDevice(gladys, fields.device, config);
-    return { signalled };
+  approve_latest_request(hub, { fields = {} }) {
+    return decide(hub, fields, true);
+  },
+
+  decline_latest_request(hub, { fields = {} }) {
+    return decide(hub, fields, false);
   },
 };

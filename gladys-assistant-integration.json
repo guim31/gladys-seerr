@@ -1,177 +1,1175 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "Overseerr / Jellyseerr",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Movie and series requests of Overseerr, Jellyseerr or Seerr: approvals, arrivals, issues.",
+    "fr": "Demandes de films et séries Overseerr, Jellyseerr ou Seerr : approbations, arrivées, problèmes.",
+    "de": "Film- und Serienanfragen von Overseerr, Jellyseerr oder Seerr: Freigaben, Eingänge, Probleme.",
+    "es": "Solicitudes de películas y series de Overseerr, Jellyseerr o Seerr: aprobaciones, llegadas."
   },
   "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "docker_image": "ghcr.io/guim31/gladys-seerr:1.0.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/guim31/gladys-seerr/main/cover.png",
+  "categories": ["multimedia"],
+  "transports": ["local"],
   "config_schema": [
     {
-      "key": "intro",
+      "key": "server_1",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "Overseerr / Jellyseerr",
+        "fr": "Overseerr / Jellyseerr",
+        "de": "Overseerr / Jellyseerr",
+        "es": "Overseerr / Jellyseerr"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Address and API key of your Overseerr, Jellyseerr or Seerr (Settings → General → API Key).",
+        "fr": "Adresse et clé d'API de votre Overseerr, Jellyseerr ou Seerr (Settings → General → API Key).",
+        "de": "Adresse und API-Schlüssel deines Overseerr, Jellyseerr oder Seerr (Settings → General → API Key).",
+        "es": "Dirección y clave de API de su Overseerr, Jellyseerr o Seerr (Settings → General → API Key)."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://docs.overseerr.dev/using-overseerr/settings",
+          "label": {
+            "en": "Where to find the API key",
+            "fr": "Où trouver la clé d'API",
+            "de": "Wo du den API-Schlüssel findest",
+            "es": "Dónde encontrar la clave de API"
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
+      "key": "server_1_url",
+      "type": "string",
+      "label": {
+        "en": "Address",
+        "fr": "Adresse",
+        "de": "Adresse",
+        "es": "Dirección"
       },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
-    },
-    {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
       "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
+        "en": "IP address or name with the port, and the URL base if any (e.g. http://192.168.1.2:5055).",
+        "fr": "Adresse IP ou nom avec le port, et la base d'URL s'il y en a une (ex. http://192.168.1.2:5055).",
+        "de": "IP-Adresse oder Name mit Port und ggf. URL-Basis (z. B. http://192.168.1.2:5055).",
+        "es": "Dirección IP o nombre con el puerto, y la base de URL si la hay (p. ej. http://192.168.1.2:5055)."
       },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
-      "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "placeholder": {
+        "en": "e.g. 192.168.1.2:5055",
+        "fr": "ex. 192.168.1.2:5055",
+        "de": "z. B. 192.168.1.2:5055",
+        "es": "p. ej. 192.168.1.2:5055"
+      },
       "required": false,
-      "default": "celsius",
+      "default": ""
+    },
+    {
+      "key": "server_1_api_key",
+      "type": "secret",
+      "label": {
+        "en": "API key",
+        "fr": "Clé d'API",
+        "de": "API-Schlüssel",
+        "es": "Clave de API"
+      },
+      "description": {
+        "en": "Settings → General → API Key. It acts as the administrator of the server.",
+        "fr": "Settings → General → API Key. Elle agit comme l'administrateur du serveur.",
+        "de": "Settings → General → API Key. Er handelt als Administrator des Servers.",
+        "es": "Settings → General → API Key. Actúa como el administrador del servidor."
+      },
+      "required": false
+    },
+    {
+      "key": "server_1_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "description": {
+        "en": "Name of the device in Gladys. Empty: the name of the application followed by the address.",
+        "fr": "Nom de l'appareil dans Gladys. Vide : le nom de l'application suivi de l'adresse.",
+        "de": "Name des Geräts in Gladys. Leer: der Name der Anwendung, gefolgt von der Adresse.",
+        "es": "Nombre del dispositivo en Gladys. Vacío: el nombre de la aplicación seguido de la dirección."
+      },
+      "placeholder": {
+        "en": "e.g. Jellyseerr",
+        "fr": "ex. Jellyseerr",
+        "de": "z. B. Jellyseerr",
+        "es": "p. ej. Jellyseerr"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "server_2",
+      "type": "section",
+      "label": {
+        "en": "Second server (optional)",
+        "fr": "Second serveur (facultatif)",
+        "de": "Zweiter Server (optional)",
+        "es": "Segundo servidor (opcional)"
+      },
+      "description": {
+        "en": "Same fields, for another server (a 4K instance, a Jellyseerr next to an Overseerr…).",
+        "fr": "Mêmes champs, pour un autre serveur (une instance 4K, un Jellyseerr à côté d’un Overseerr…).",
+        "de": "Dieselben Felder für einen weiteren Server (eine 4K-Instanz, ein Jellyseerr neben einem Overseerr…).",
+        "es": "Los mismos campos, para otro servidor (una instancia 4K, un Jellyseerr junto a un Overseerr…)."
+      }
+    },
+    {
+      "key": "server_2_url",
+      "type": "string",
+      "label": {
+        "en": "Address",
+        "fr": "Adresse",
+        "de": "Adresse",
+        "es": "Dirección"
+      },
+      "description": {
+        "en": "IP address or name with the port, and the URL base if any (e.g. http://192.168.1.2:5055).",
+        "fr": "Adresse IP ou nom avec le port, et la base d'URL s'il y en a une (ex. http://192.168.1.2:5055).",
+        "de": "IP-Adresse oder Name mit Port und ggf. URL-Basis (z. B. http://192.168.1.2:5055).",
+        "es": "Dirección IP o nombre con el puerto, y la base de URL si la hay (p. ej. http://192.168.1.2:5055)."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.2:5055",
+        "fr": "ex. 192.168.1.2:5055",
+        "de": "z. B. 192.168.1.2:5055",
+        "es": "p. ej. 192.168.1.2:5055"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "server_2_api_key",
+      "type": "secret",
+      "label": {
+        "en": "API key",
+        "fr": "Clé d'API",
+        "de": "API-Schlüssel",
+        "es": "Clave de API"
+      },
+      "description": {
+        "en": "Settings → General → API Key. It acts as the administrator of the server.",
+        "fr": "Settings → General → API Key. Elle agit comme l'administrateur du serveur.",
+        "de": "Settings → General → API Key. Er handelt als Administrator des Servers.",
+        "es": "Settings → General → API Key. Actúa como el administrador del servidor."
+      },
+      "required": false
+    },
+    {
+      "key": "server_2_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "description": {
+        "en": "Name of the device in Gladys. Empty: the name of the application followed by the address.",
+        "fr": "Nom de l'appareil dans Gladys. Vide : le nom de l'application suivi de l'adresse.",
+        "de": "Name des Geräts in Gladys. Leer: der Name der Anwendung, gefolgt von der Adresse.",
+        "es": "Nombre del dispositivo en Gladys. Vacío: el nombre de la aplicación seguido de la dirección."
+      },
+      "placeholder": {
+        "en": "e.g. Jellyseerr",
+        "fr": "ex. Jellyseerr",
+        "de": "z. B. Jellyseerr",
+        "es": "p. ej. Jellyseerr"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "options",
+      "type": "section",
+      "label": {
+        "en": "Options",
+        "fr": "Options",
+        "de": "Optionen",
+        "es": "Opciones"
+      }
+    },
+    {
+      "key": "allow_approval",
+      "type": "boolean",
+      "label": {
+        "en": "Allow approving and declining",
+        "fr": "Autoriser l'approbation et le refus",
+        "de": "Freigeben und Ablehnen erlauben",
+        "es": "Permitir aprobar y rechazar"
+      },
+      "description": {
+        "en": "Lets scenes and the widget approve or decline the newest request awaiting approval. Off: Gladys only reads.",
+        "fr": "Permet aux scènes et au widget d'approuver ou de refuser la dernière demande en attente. Décoché : Gladys ne fait que lire.",
+        "de": "Erlaubt Szenen und dem Widget, die neueste wartende Anfrage freizugeben oder abzulehnen. Aus: Gladys liest nur.",
+        "es": "Permite que las escenas y el widget aprueben o rechacen la última solicitud pendiente. Desactivado: Gladys solo lee."
+      },
+      "required": false,
+      "default": false
+    },
+    {
+      "key": "allow_self_signed",
+      "type": "boolean",
+      "label": {
+        "en": "Accept self-signed certificates",
+        "fr": "Accepter les certificats auto-signés",
+        "de": "Selbstsignierte Zertifikate akzeptieren",
+        "es": "Aceptar certificados autofirmados"
+      },
+      "description": {
+        "en": "For https:// addresses served with your own certificate. Tick only for your own servers.",
+        "fr": "Pour les adresses en https:// servies avec votre propre certificat. À cocher pour vos propres serveurs seulement.",
+        "de": "Für https://-Adressen mit deinem eigenen Zertifikat. Nur für deine eigenen Server aktivieren.",
+        "es": "Para direcciones https:// servidas con su propio certificado. Márquelo solo para sus propios servidores."
+      },
+      "required": false,
+      "default": false
+    },
+    {
+      "key": "poll_interval",
+      "type": "select",
+      "label": {
+        "en": "Refresh interval",
+        "fr": "Intervalle de rafraîchissement",
+        "de": "Aktualisierungsintervall",
+        "es": "Intervalo de actualización"
+      },
+      "description": {
+        "en": "How often the servers are read: counters, new requests, arrivals, issues.",
+        "fr": "Fréquence de lecture des serveurs : compteurs, nouvelles demandes, arrivées, problèmes.",
+        "de": "Wie oft die Server gelesen werden: Zähler, neue Anfragen, Eingänge, Probleme.",
+        "es": "Con qué frecuencia se leen los servidores: contadores, nuevas solicitudes, llegadas, problemas."
+      },
+      "required": false,
+      "default": "60",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "30",
+          "label": {
+            "en": "30 seconds",
+            "fr": "30 secondes",
+            "de": "30 Sekunden",
+            "es": "30 segundos"
+          }
+        },
+        {
+          "value": "60",
+          "label": {
+            "en": "1 minute",
+            "fr": "1 minute",
+            "de": "1 Minute",
+            "es": "1 minuto"
+          }
+        },
+        {
+          "value": "120",
+          "label": {
+            "en": "2 minutes",
+            "fr": "2 minutes",
+            "de": "2 Minuten",
+            "es": "2 minutos"
+          }
+        },
+        {
+          "value": "300",
+          "label": {
+            "en": "5 minutes",
+            "fr": "5 minutes",
+            "de": "5 Minuten",
+            "es": "5 minutos"
+          }
+        },
+        {
+          "value": "600",
+          "label": {
+            "en": "10 minutes",
+            "fr": "10 minutes",
+            "de": "10 Minuten",
+            "es": "10 minutos"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
-      "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "key": "language",
+      "type": "select",
+      "label": {
+        "en": "Language of the texts",
+        "fr": "Langue des textes",
+        "de": "Sprache der Texte",
+        "es": "Idioma de los textos"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "Names given to the features when a device is added, titles of the movies, words sent to the scenes.",
+        "fr": "Noms donnés aux fonctionnalités à l'ajout d'un appareil, titres des films, mots envoyés aux scènes.",
+        "de": "Namen der Funktionen beim Hinzufügen eines Geräts, Filmtitel, an Szenen gesendete Wörter.",
+        "es": "Nombres de las funciones al añadir un dispositivo, títulos de las películas, palabras enviadas a las escenas."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": "fr",
+      "options": [
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais",
+            "de": "Englisch",
+            "es": "Inglés"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français",
+            "de": "Französisch",
+            "es": "Francés"
+          }
+        },
+        {
+          "value": "de",
+          "label": {
+            "en": "German",
+            "fr": "Allemand",
+            "de": "Deutsch",
+            "es": "Alemán"
+          }
+        },
+        {
+          "value": "es",
+          "label": {
+            "en": "Spanish",
+            "fr": "Espagnol",
+            "de": "Spanisch",
+            "es": "Español"
+          }
+        }
+      ]
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "description": {
+        "en": "Reads every server now and reports what it finds.",
+        "fr": "Lit chaque serveur maintenant et indique ce qu’il trouve.",
+        "de": "Liest jeden Server jetzt und meldet, was er findet.",
+        "es": "Lee cada servidor ahora e indica lo que encuentra."
+      },
       "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "request_created",
+      "label": {
+        "en": "New request",
+        "fr": "Nouvelle demande",
+        "de": "Neue Anfrage",
+        "es": "Nueva solicitud"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "Someone requested a movie or a series, awaiting approval or approved at once.",
+        "fr": "Quelqu'un a demandé un film ou une série, en attente d'approbation ou approuvé d'office.",
+        "de": "Jemand hat einen Film oder eine Serie angefragt, wartend auf Freigabe oder sofort freigegeben.",
+        "es": "Alguien ha solicitado una película o una serie, pendiente de aprobación o aprobada directamente."
       },
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "label": {
+            "en": "Server (empty: any)",
+            "fr": "Serveur (vide : tous)",
+            "de": "Server (leer: alle)",
+            "es": "Servidor (vacío: todos)"
+          }
         },
         {
-          "key": "target",
-          "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "key": "media_type",
+          "type": "select",
+          "label": {
+            "en": "Movies or series (empty: both)",
+            "fr": "Films ou séries (vide : les deux)",
+            "de": "Filme oder Serien (leer: beides)",
+            "es": "Películas o series (vacío: ambas)"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "movie",
+              "label": {
+                "en": "Movies",
+                "fr": "Films",
+                "de": "Filme",
+                "es": "Películas"
+              }
+            },
+            {
+              "value": "tv",
+              "label": {
+                "en": "Series",
+                "fr": "Séries",
+                "de": "Serien",
+                "es": "Series"
+              }
+            }
+          ]
+        },
+        {
+          "key": "status",
+          "type": "select",
+          "label": {
+            "en": "Status (empty: any)",
+            "fr": "État (vide : tous)",
+            "de": "Status (leer: alle)",
+            "es": "Estado (vacío: todos)"
+          },
+          "options": [
+            {
+              "value": "pending",
+              "label": {
+                "en": "Awaiting approval",
+                "fr": "En attente d'approbation",
+                "de": "Wartet auf Freigabe",
+                "es": "Pendiente de aprobación"
+              }
+            },
+            {
+              "value": "approved",
+              "label": {
+                "en": "Approved at once",
+                "fr": "Approuvée d'office",
+                "de": "Sofort freigegeben",
+                "es": "Aprobada directamente"
+              }
+            }
+          ]
+        },
+        {
+          "key": "requested_by",
+          "type": "string",
+          "label": {
+            "en": "Requested by (empty: anyone)",
+            "fr": "Demandé par (vide : tout le monde)",
+            "de": "Angefragt von (leer: alle)",
+            "es": "Solicitado por (vacío: cualquiera)"
+          },
+          "description": {
+            "en": "The name the user has in Overseerr, exactly as it shows there.",
+            "fr": "Le nom de l'utilisateur dans Overseerr, exactement comme il s'y affiche.",
+            "de": "Der Name des Benutzers in Overseerr, genau wie er dort angezeigt wird.",
+            "es": "El nombre del usuario en Overseerr, tal como aparece allí."
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "instance",
+          "type": "string",
+          "label": {
+            "en": "Server name",
+            "fr": "Nom du serveur",
+            "de": "Name des Servers",
+            "es": "Nombre del servidor"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Title of the movie or series",
+            "fr": "Titre du film ou de la série",
+            "de": "Titel des Films oder der Serie",
+            "es": "Título de la película o serie"
+          }
+        },
+        {
+          "key": "media_type",
+          "type": "string",
+          "label": {
+            "en": "Media type (movie, tv)",
+            "fr": "Type de média (movie, tv)",
+            "de": "Medientyp (movie, tv)",
+            "es": "Tipo de medio (movie, tv)"
+          }
+        },
+        {
+          "key": "media_label",
+          "type": "string",
+          "label": {
+            "en": "Movie or Series, as a word",
+            "fr": "Film ou Série, en toutes lettres",
+            "de": "Film oder Serie, als Wort",
+            "es": "Película o Serie, en palabras"
+          }
+        },
+        {
+          "key": "requested_by",
+          "type": "string",
+          "label": {
+            "en": "Requested by",
+            "fr": "Demandé par",
+            "de": "Angefragt von",
+            "es": "Solicitado por"
+          }
+        },
+        {
+          "key": "status",
+          "type": "string",
+          "label": {
+            "en": "Status (pending, approved)",
+            "fr": "État (pending, approved)",
+            "de": "Status (pending, approved)",
+            "es": "Estado (pending, approved)"
+          }
+        },
+        {
+          "key": "seasons",
+          "type": "string",
+          "label": {
+            "en": "Seasons requested (series)",
+            "fr": "Saisons demandées (séries)",
+            "de": "Angefragte Staffeln (Serien)",
+            "es": "Temporadas solicitadas (series)"
+          }
+        },
+        {
+          "key": "is_4k",
+          "type": "boolean",
+          "label": {
+            "en": "4K request",
+            "fr": "Demande en 4K",
+            "de": "4K-Anfrage",
+            "es": "Solicitud en 4K"
+          }
+        },
+        {
+          "key": "request_id",
+          "type": "number",
+          "label": {
+            "en": "Request number",
+            "fr": "Numéro de la demande",
+            "de": "Nummer der Anfrage",
+            "es": "Número de la solicitud"
+          }
+        }
+      ]
+    },
+    {
+      "key": "request_available",
+      "label": {
+        "en": "Requested media available",
+        "fr": "Demande disponible",
+        "de": "Angefragter Titel verfügbar",
+        "es": "Solicitud disponible"
+      },
+      "description": {
+        "en": "A requested movie, or every season of a requested series, is now in the library.",
+        "fr": "Un film demandé, ou toutes les saisons d'une série demandée, est maintenant dans la médiathèque.",
+        "de": "Ein angefragter Film oder alle Staffeln einer angefragten Serie sind jetzt in der Mediathek.",
+        "es": "Una película solicitada, o todas las temporadas de una serie solicitada, ya está en la mediateca."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Server (empty: any)",
+            "fr": "Serveur (vide : tous)",
+            "de": "Server (leer: alle)",
+            "es": "Servidor (vacío: todos)"
+          }
+        },
+        {
+          "key": "media_type",
+          "type": "select",
+          "label": {
+            "en": "Movies or series (empty: both)",
+            "fr": "Films ou séries (vide : les deux)",
+            "de": "Filme oder Serien (leer: beides)",
+            "es": "Películas o series (vacío: ambas)"
+          },
+          "options": [
+            {
+              "value": "movie",
+              "label": {
+                "en": "Movies",
+                "fr": "Films",
+                "de": "Filme",
+                "es": "Películas"
+              }
+            },
+            {
+              "value": "tv",
+              "label": {
+                "en": "Series",
+                "fr": "Séries",
+                "de": "Serien",
+                "es": "Series"
+              }
+            }
+          ]
+        },
+        {
+          "key": "requested_by",
+          "type": "string",
+          "label": {
+            "en": "Requested by (empty: anyone)",
+            "fr": "Demandé par (vide : tout le monde)",
+            "de": "Angefragt von (leer: alle)",
+            "es": "Solicitado por (vacío: cualquiera)"
+          },
+          "description": {
+            "en": "The name the user has in Overseerr, exactly as it shows there.",
+            "fr": "Le nom de l'utilisateur dans Overseerr, exactement comme il s'y affiche.",
+            "de": "Der Name des Benutzers in Overseerr, genau wie er dort angezeigt wird.",
+            "es": "El nombre del usuario en Overseerr, tal como aparece allí."
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "instance",
+          "type": "string",
+          "label": {
+            "en": "Server name",
+            "fr": "Nom du serveur",
+            "de": "Name des Servers",
+            "es": "Nombre del servidor"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Title of the movie or series",
+            "fr": "Titre du film ou de la série",
+            "de": "Titel des Films oder der Serie",
+            "es": "Título de la película o serie"
+          }
+        },
+        {
+          "key": "media_type",
+          "type": "string",
+          "label": {
+            "en": "Media type (movie, tv)",
+            "fr": "Type de média (movie, tv)",
+            "de": "Medientyp (movie, tv)",
+            "es": "Tipo de medio (movie, tv)"
+          }
+        },
+        {
+          "key": "media_label",
+          "type": "string",
+          "label": {
+            "en": "Movie or Series, as a word",
+            "fr": "Film ou Série, en toutes lettres",
+            "de": "Film oder Serie, als Wort",
+            "es": "Película o Serie, en palabras"
+          }
+        },
+        {
+          "key": "requested_by",
+          "type": "string",
+          "label": {
+            "en": "Requested by",
+            "fr": "Demandé par",
+            "de": "Angefragt von",
+            "es": "Solicitado por"
+          }
+        },
+        {
+          "key": "is_4k",
+          "type": "boolean",
+          "label": {
+            "en": "4K request",
+            "fr": "Demande en 4K",
+            "de": "4K-Anfrage",
+            "es": "Solicitud en 4K"
+          }
+        },
+        {
+          "key": "request_id",
+          "type": "number",
+          "label": {
+            "en": "Request number",
+            "fr": "Numéro de la demande",
+            "de": "Nummer der Anfrage",
+            "es": "Número de la solicitud"
+          }
+        }
+      ]
+    },
+    {
+      "key": "issue_reported",
+      "label": {
+        "en": "New issue reported",
+        "fr": "Nouveau problème signalé",
+        "de": "Neues Problem gemeldet",
+        "es": "Nuevo problema notificado"
+      },
+      "description": {
+        "en": "A user reported a problem with a movie or an episode: video, audio, subtitles or other.",
+        "fr": "Un utilisateur a signalé un problème sur un film ou un épisode : vidéo, audio, sous-titres ou autre.",
+        "de": "Ein Benutzer hat ein Problem mit einem Film oder einer Episode gemeldet: Video, Audio, Untertitel oder anderes.",
+        "es": "Un usuario ha notificado un problema con una película o un episodio: vídeo, audio, subtítulos u otro."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Server (empty: any)",
+            "fr": "Serveur (vide : tous)",
+            "de": "Server (leer: alle)",
+            "es": "Servidor (vacío: todos)"
+          }
+        },
+        {
+          "key": "media_type",
+          "type": "select",
+          "label": {
+            "en": "Movies or series (empty: both)",
+            "fr": "Films ou séries (vide : les deux)",
+            "de": "Filme oder Serien (leer: beides)",
+            "es": "Películas o series (vacío: ambas)"
+          },
+          "options": [
+            {
+              "value": "movie",
+              "label": {
+                "en": "Movies",
+                "fr": "Films",
+                "de": "Filme",
+                "es": "Películas"
+              }
+            },
+            {
+              "value": "tv",
+              "label": {
+                "en": "Series",
+                "fr": "Séries",
+                "de": "Serien",
+                "es": "Series"
+              }
+            }
+          ]
+        },
+        {
+          "key": "issue_type",
+          "type": "select",
+          "label": {
+            "en": "Kind of issue (empty: any)",
+            "fr": "Type de problème (vide : tous)",
+            "de": "Art des Problems (leer: alle)",
+            "es": "Tipo de problema (vacío: todos)"
+          },
+          "options": [
+            {
+              "value": "video",
+              "label": {
+                "en": "Video",
+                "fr": "Vidéo",
+                "de": "Video",
+                "es": "Vídeo"
+              }
+            },
+            {
+              "value": "audio",
+              "label": {
+                "en": "Audio",
+                "fr": "Audio",
+                "de": "Audio",
+                "es": "Audio"
+              }
+            },
+            {
+              "value": "subtitles",
+              "label": {
+                "en": "Subtitles",
+                "fr": "Sous-titres",
+                "de": "Untertitel",
+                "es": "Subtítulos"
+              }
+            },
+            {
+              "value": "other",
+              "label": {
+                "en": "Other",
+                "fr": "Autre",
+                "de": "Sonstiges",
+                "es": "Otro"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "instance",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
+          "label": {
+            "en": "Server name",
+            "fr": "Nom du serveur",
+            "de": "Name des Servers",
+            "es": "Nombre del servidor"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Title of the movie or series",
+            "fr": "Titre du film ou de la série",
+            "de": "Titel des Films oder der Serie",
+            "es": "Título de la película o serie"
+          }
+        },
+        {
+          "key": "media_type",
+          "type": "string",
+          "label": {
+            "en": "Media type (movie, tv)",
+            "fr": "Type de média (movie, tv)",
+            "de": "Medientyp (movie, tv)",
+            "es": "Tipo de medio (movie, tv)"
+          }
+        },
+        {
+          "key": "media_label",
+          "type": "string",
+          "label": {
+            "en": "Movie or Series, as a word",
+            "fr": "Film ou Série, en toutes lettres",
+            "de": "Film oder Serie, als Wort",
+            "es": "Película o Serie, en palabras"
+          }
+        },
+        {
+          "key": "issue_type",
+          "type": "string",
+          "label": {
+            "en": "Kind (video, audio, subtitles, other)",
+            "fr": "Type (video, audio, subtitles, other)",
+            "de": "Art (video, audio, subtitles, other)",
+            "es": "Tipo (video, audio, subtitles, other)"
+          }
+        },
+        {
+          "key": "issue_label",
+          "type": "string",
+          "label": {
+            "en": "Kind of issue, as a word",
+            "fr": "Type de problème, en toutes lettres",
+            "de": "Art des Problems, als Wort",
+            "es": "Tipo de problema, en palabras"
+          }
+        },
+        {
+          "key": "reported_by",
+          "type": "string",
+          "label": {
+            "en": "Reported by",
+            "fr": "Signalé par",
+            "de": "Gemeldet von",
+            "es": "Notificado por"
+          }
+        },
+        {
+          "key": "message",
+          "type": "string",
+          "label": {
+            "en": "Message of the user",
+            "fr": "Message de l'utilisateur",
+            "de": "Nachricht des Benutzers",
+            "es": "Mensaje del usuario"
+          }
+        },
+        {
+          "key": "season",
+          "type": "number",
+          "label": {
+            "en": "Season (0: not given)",
+            "fr": "Saison (0 : non précisée)",
+            "de": "Staffel (0: nicht angegeben)",
+            "es": "Temporada (0: no indicada)"
+          }
+        },
+        {
+          "key": "episode",
+          "type": "number",
+          "label": {
+            "en": "Episode (0: not given)",
+            "fr": "Épisode (0 : non précisé)",
+            "de": "Episode (0: nicht angegeben)",
+            "es": "Episodio (0: no indicado)"
+          }
+        },
+        {
+          "key": "issue_id",
+          "type": "number",
+          "label": {
+            "en": "Issue number",
+            "fr": "Numéro du problème",
+            "de": "Nummer des Problems",
+            "es": "Número del problema"
+          }
         }
       ]
     }
   ],
   "scene_actions": [
     {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
+      "key": "approve_latest_request",
+      "label": {
+        "en": "Approve the latest request",
+        "fr": "Approuver la dernière demande",
+        "de": "Neueste Anfrage freigeben",
+        "es": "Aprobar la última solicitud"
       },
-      "timeout_seconds": 15,
+      "description": {
+        "en": "Approves the newest request awaiting approval (option \"Allow approving and declining\").",
+        "fr": "Approuve la demande en attente la plus récente (option « Autoriser l'approbation et le refus »).",
+        "de": "Gibt die neueste wartende Anfrage frei (Option „Freigeben und Ablehnen erlauben“).",
+        "es": "Aprueba la solicitud pendiente más reciente (opción «Permitir aprobar y rechazar»)."
+      },
+      "timeout_seconds": 30,
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
+          "label": {
+            "en": "Server (empty: any)",
+            "fr": "Serveur (vide : tous)",
+            "de": "Server (leer: alle)",
+            "es": "Servidor (vacío: todos)"
+          }
+        },
+        {
+          "key": "media_type",
+          "type": "select",
+          "label": {
+            "en": "Movies or series (empty: both)",
+            "fr": "Films ou séries (vide : les deux)",
+            "de": "Filme oder Serien (leer: beides)",
+            "es": "Películas o series (vacío: ambas)"
+          },
+          "options": [
+            {
+              "value": "movie",
+              "label": {
+                "en": "Movies",
+                "fr": "Films",
+                "de": "Filme",
+                "es": "Películas"
+              }
+            },
+            {
+              "value": "tv",
+              "label": {
+                "en": "Series",
+                "fr": "Séries",
+                "de": "Serien",
+                "es": "Series"
+              }
+            }
+          ]
         }
       ],
       "outputs": [
         {
-          "key": "signalled",
+          "key": "done",
           "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "label": {
+            "en": "A request was approved",
+            "fr": "Une demande a été approuvée",
+            "de": "Eine Anfrage wurde freigegeben",
+            "es": "Se ha aprobado una solicitud"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Title of the movie or series",
+            "fr": "Titre du film ou de la série",
+            "de": "Titel des Films oder der Serie",
+            "es": "Título de la película o serie"
+          }
+        },
+        {
+          "key": "requested_by",
+          "type": "string",
+          "label": {
+            "en": "Requested by",
+            "fr": "Demandé par",
+            "de": "Angefragt von",
+            "es": "Solicitado por"
+          }
+        },
+        {
+          "key": "media_type",
+          "type": "string",
+          "label": {
+            "en": "Movie or Series, as a word",
+            "fr": "Film ou Série, en toutes lettres",
+            "de": "Film oder Serie, als Wort",
+            "es": "Película o Serie, en palabras"
+          }
+        }
+      ]
+    },
+    {
+      "key": "decline_latest_request",
+      "label": {
+        "en": "Decline the latest request",
+        "fr": "Refuser la dernière demande",
+        "de": "Neueste Anfrage ablehnen",
+        "es": "Rechazar la última solicitud"
+      },
+      "description": {
+        "en": "Declines the newest request awaiting approval (option \"Allow approving and declining\").",
+        "fr": "Refuse la demande en attente la plus récente (option « Autoriser l'approbation et le refus »).",
+        "de": "Lehnt die neueste wartende Anfrage ab (Option „Freigeben und Ablehnen erlauben“).",
+        "es": "Rechaza la solicitud pendiente más reciente (opción «Permitir aprobar y rechazar»)."
+      },
+      "timeout_seconds": 30,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Server (empty: any)",
+            "fr": "Serveur (vide : tous)",
+            "de": "Server (leer: alle)",
+            "es": "Servidor (vacío: todos)"
+          }
+        },
+        {
+          "key": "media_type",
+          "type": "select",
+          "label": {
+            "en": "Movies or series (empty: both)",
+            "fr": "Films ou séries (vide : les deux)",
+            "de": "Filme oder Serien (leer: beides)",
+            "es": "Películas o series (vacío: ambas)"
+          },
+          "options": [
+            {
+              "value": "movie",
+              "label": {
+                "en": "Movies",
+                "fr": "Films",
+                "de": "Filme",
+                "es": "Películas"
+              }
+            },
+            {
+              "value": "tv",
+              "label": {
+                "en": "Series",
+                "fr": "Séries",
+                "de": "Serien",
+                "es": "Series"
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "done",
+          "type": "boolean",
+          "label": {
+            "en": "A request was declined",
+            "fr": "Une demande a été refusée",
+            "de": "Eine Anfrage wurde abgelehnt",
+            "es": "Se ha rechazado una solicitud"
+          }
+        },
+        {
+          "key": "title",
+          "type": "string",
+          "label": {
+            "en": "Title of the movie or series",
+            "fr": "Titre du film ou de la série",
+            "de": "Titel des Films oder der Serie",
+            "es": "Título de la película o serie"
+          }
+        },
+        {
+          "key": "requested_by",
+          "type": "string",
+          "label": {
+            "en": "Requested by",
+            "fr": "Demandé par",
+            "de": "Angefragt von",
+            "es": "Solicitado por"
+          }
+        },
+        {
+          "key": "media_type",
+          "type": "string",
+          "label": {
+            "en": "Movie or Series, as a word",
+            "fr": "Film ou Série, en toutes lettres",
+            "de": "Film oder Serie, als Wort",
+            "es": "Película o Serie, en palabras"
+          }
         }
       ]
     }
   ],
   "widgets": [
     {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
+      "key": "requests",
+      "label": {
+        "en": "Media requests",
+        "fr": "Demandes de médias",
+        "de": "Medienanfragen",
+        "es": "Solicitudes de medios"
       },
-      "icon": "activity",
-      "action_timeout_seconds": 15
+      "description": {
+        "en": "The newest requests with their state, approvals waiting and open issues.",
+        "fr": "Les dernières demandes et leur état, les approbations en attente et les problèmes ouverts.",
+        "de": "Die neuesten Anfragen mit Status, wartende Freigaben und offene Probleme.",
+        "es": "Las últimas solicitudes con su estado, aprobaciones pendientes y problemas abiertos."
+      },
+      "icon": "film",
+      "settings": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Server (empty: any)",
+            "fr": "Serveur (vide : tous)",
+            "de": "Server (leer: alle)",
+            "es": "Servidor (vacío: todos)"
+          }
+        }
+      ],
+      "action_timeout_seconds": 30
     }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "message": "not found",
+  "errors": [
+    {
+      "path": "/api/v1/nothing-here",
+      "message": "not found"
+    }
+  ]
+}
