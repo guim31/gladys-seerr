@@ -1,6 +1,6 @@
 {
   "name": "gladys-seerr",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Gladys Assistant integration for Overseerr, Jellyseerr and Seerr: media requests, approvals, arrivals and issues.",
   "type": "module",

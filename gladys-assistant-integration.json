@@ -8,8 +8,8 @@
     "de": "Film- und Serienanfragen von Overseerr, Jellyseerr oder Seerr: Freigaben, Eingänge, Probleme.",
     "es": "Solicitudes de películas y series de Overseerr, Jellyseerr o Seerr: aprobaciones, llegadas."
   },
-  "version": "1.0.0",
-  "docker_image": "ghcr.io/guim31/gladys-seerr:1.0.0",
+  "version": "1.0.1",
+  "docker_image": "ghcr.io/guim31/gladys-seerr:1.0.1",
   "gladys_version": ">=5.1.0",
   "cover_image": "https://raw.githubusercontent.com/guim31/gladys-seerr/main/cover.png",
   "categories": ["multimedia"],

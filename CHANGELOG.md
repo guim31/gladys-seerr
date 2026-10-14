@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-14
+
 ### Added
 
 - Overseerr, Jellyseerr and Seerr servers in Gladys, up to two: one device per
@@ -28,4 +30,5 @@ the notes of the version's GitHub Release.
   interval from 30 seconds to 10 minutes.
 - English, French, German and Spanish texts and documentation.
 
-[Unreleased]: https://github.com/guim31/gladys-seerr/commits/main
+[Unreleased]: https://github.com/guim31/gladys-seerr/compare/v1.0.1...HEAD
+[1.0.1]: https://github.com/guim31/gladys-seerr/releases/tag/v1.0.1
