@@ -1,4 +1,4 @@
-# Overseerr / Jellyseerr
+# Overseerr / Jellyseerr / Ombi
 
 Verfolge in Gladys die Film- und Serienanfragen deines Haushalts: was auf deine
 Freigabe wartet, was gerade heruntergeladen wird, was neu in der Mediathek
@@ -14,6 +14,8 @@ selbst verfolgt; diese hier verfolgt die Anfragen deiner Benutzer.
 > Jellyfin, Sonarr, Radarr und Gladys zusammen): Rückmeldungen willkommen auf
 > [GitHub](https://github.com/guim31/gladys-seerr/issues).
 
+**Ombi** (v4) wird ebenfalls unterstützt, mit seiner eigenen API: ein Ombi neben ein oder zwei Servern Overseerr, Jellyseerr oder Seerr. Getestet mit einem echten Ombi 4.53.10.
+
 ## Voraussetzungen
 
 - Gladys Assistant 5.1.0 oder neuer.
@@ -23,9 +25,11 @@ selbst verfolgt; diese hier verfolgt die Anfragen deiner Benutzer.
   Key**. Der Schlüssel handelt als Administrator des Servers: Behalte ihn für
   dich.
 
+- Für **Ombi**: Ombi v4, seine Adresse (standardmäßig Port 3579) und sein API-Schlüssel unter **Settings → Ombi → API Key**. Auch er handelt als Administrator.
+
 ## Konfiguration
 
-Integrationen → Overseerr / Jellyseerr → Konfiguration:
+Integrationen → Overseerr / Jellyseerr / Ombi → Konfiguration:
 
 - **Adresse**: die IP-Adresse oder der Name des Servers mit Port und ggf. die
   URL-Basis hinter einem Reverse-Proxy (`https://example.org/overseerr`). Eine
@@ -50,6 +54,8 @@ Integrationen → Overseerr / Jellyseerr → Konfiguration:
 
 Füge anschließend im Tab **Entdecken** das Gerät jedes Servers zu Gladys hinzu.
 
+Der Abschnitt **Ombi (optional)** hat dieselben drei Felder (Adresse, API-Schlüssel, Name) für ein Ombi v4.
+
 ## Gerät
 
 Ein Gerät pro Server, nur lesend:
@@ -70,6 +76,8 @@ Ein Gerät pro Server, nur lesend:
 
 Die Zähler behalten ihren Verlauf: Ein Diagramm der wartenden Anfragen zeigt,
 wie lange deine Familie wartet.
+
+Das Gerät **Ombi** hat dieselben Funktionen, außer **Fehlgeschlagene Anfragen** und **Update verfügbar**: Ombi kennt keinen Fehlerstatus und meldet seine Updates nicht. Seine Gesamtzahl ist die Summe dessen, was Ombi zählt (wartend, freigegeben, verfügbar, abgelehnt).
 
 ## Szenenauslöser
 
@@ -92,6 +100,8 @@ Was sie schon kannte, wird nicht erneut gemeldet. Eine Anfrage oder ein
 Problem, das mehr als eine Stunde vor dem Lesen entstand (die Integration war
 gestoppt), wird nicht als neu gemeldet; ein Eingang immer.
 
+Ombi sendet dieselben drei Ereignisse mit denselben Informationen. Seine Problemarten sind die Kategorien, die sein Administrator angelegt hat: Eine Kategorie, die Video, Audio oder Untertitel nennt, wird erkannt, jede andere wird als „Sonstiges“ weitergegeben.
+
 ## Szenenaktionen
 
 Beide brauchen **Freigeben und Ablehnen erlauben**; sonst schlagen sie mit einer
@@ -109,6 +119,8 @@ An die folgenden Aktionen übergebene Ergebnisse: ob eine Anfrage gefunden
 wurde (keine wartende ist kein Fehler), ihr Titel, ihr Anfragender, Film oder
 Serie.
 
+Bei Ombi geben die Aktionen die Anfrage über seine API frei oder lehnen sie ab, wie seine Oberfläche; eine abgelehnte Anfrage kann später freigegeben werden.
+
 ## Widget
 
 **Medienanfragen**: drei Kacheln (freizugeben, in Bearbeitung, offene
@@ -124,6 +136,8 @@ wartende Anfrage, und zwei Schaltflächen wirken auf sie: **Freigeben** und
 Die Poster kommen vom Server selbst (seinem Bildercache): Weder dein Browser
 noch die Integration kontaktieren TMDB.
 
+Ombi speichert die Poster nicht (seine Oberfläche lädt sie von TMDB): Die Anfragen eines Ombi erscheinen ohne Poster.
+
 ## Szenenbeispiele
 
 - **Den Anfragenden benachrichtigen**: Auslöser „Angefragter Titel verfügbar“,
@@ -137,6 +151,8 @@ noch die Integration kontaktieren TMDB.
   Nachricht.
 - **Morgendliche Übersicht**: jeden Tag um 8 Uhr den Wert von „Anfragen, die
   auf Freigabe warten“ senden, wenn er über 0 liegt.
+
+Die Beispiele funktionieren genauso mit einem Ombi: Wähle sein Gerät im Filter „Server“.
 
 ## API-Nutzung
 
@@ -155,6 +171,8 @@ noch die Integration kontaktieren TMDB.
   Nummern von Anfragen und Problemen und die Anfragen, die auf ihr Medium
   warten. Kein Passwort, kein Schlüssel.
 
+Ombi: Der Schlüssel steht im Header `ApiKey`. Ein Lesevorgang = `/Request/count` und `/Issues/count`; wenn sie sich ändern, und alle 10 Minuten, die 50 neuesten Film- und die 50 neuesten Serienanfragen sowie die Probleme. Die Titel kommen mit den Anfragen: Ombi wird nach nichts anderem gefragt.
+
 ## Fehlerbehebung
 
 - **„API-Schlüssel abgelehnt“**: Kopiere den Schlüssel erneut aus Settings →
@@ -171,6 +189,8 @@ noch die Integration kontaktieren TMDB.
   Integration passiert; starte **Verbindung testen**, um zu sehen, was der
   Server antwortet. Für mehr Details setze `LOG_LEVEL=debug` für die
   Integration und lies ihre Protokolle.
+
+- **„keine Ombi-API unter dieser Adresse“** (Ombi): Die Adresse antwortet, aber nicht mit der Ombi-API: Prüfe den Port (standardmäßig 3579) und die in Ombi eingestellte URL-Basis.
 
 ## Einschränkungen
 
@@ -189,3 +209,6 @@ noch die Integration kontaktieren TMDB.
 - Der Filter nach Anfragendem vergleicht den Namen genau so, wie Overseerr ihn
   anzeigt.
 - Keine Verbindung zu den Projekten Overseerr, Jellyseerr oder Seerr.
+
+- Ombi: Der 4K-Teil einer Filmanfrage wird nicht verfolgt (nur die normale Anfrage), kein Poster, kein Fehlerstatus, keine Update-Anzeige. Ombi antwortet „Request successfully deleted“, wenn es eine Anfrage ablehnt: Die Anfrage bleibt, abgelehnt.
+- Nicht mit dem Ombi-Projekt verbunden.

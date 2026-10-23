@@ -1,4 +1,4 @@
-# Overseerr / Jellyseerr
+# Overseerr / Jellyseerr / Ombi
 
 Follow the movie and series requests of your household in Gladys: what is
 waiting for your approval, what is being downloaded, what just arrived in the
@@ -14,6 +14,8 @@ downloads themselves; this one follows the requests of your users.
 > Radarr and Gladys together): feedback welcome on
 > [GitHub](https://github.com/guim31/gladys-seerr/issues).
 
+**Ombi** (v4) is supported too, with its own API: one Ombi next to up to two Overseerr, Jellyseerr or Seerr servers. Tested against a real Ombi 4.53.10.
+
 ## Requirements
 
 - Gladys Assistant 5.1.0 or later.
@@ -22,9 +24,11 @@ downloads themselves; this one follows the requests of your users.
 - Its API key: in the web interface, **Settings → General → API Key**. The key
   acts as the administrator of the server: keep it to yourself.
 
+- For **Ombi**: Ombi v4, its address (port 3579 by default) and its API key, in **Settings → Ombi → API Key**. It also acts as an administrator.
+
 ## Configuration
 
-Integrations → Overseerr / Jellyseerr → Configuration:
+Integrations → Overseerr / Jellyseerr / Ombi → Configuration:
 
 - **Address**: the IP address or name of the server with its port, and its URL
   base if it is behind a reverse proxy (`https://example.org/overseerr`). An
@@ -48,6 +52,8 @@ Integrations → Overseerr / Jellyseerr → Configuration:
 
 Then, in the **Discover** tab, add the device of each server to Gladys.
 
+The **Ombi (optional)** section has the same three fields (address, API key, name) for an Ombi v4.
+
 ## Device
 
 One device per server, read-only:
@@ -69,6 +75,8 @@ One device per server, read-only:
 The counters keep their history: a chart of the requests awaiting approval
 shows how long your family waits.
 
+The **Ombi** device has the same features, except **Failed requests** and **Update available**: Ombi has no failed state and does not announce its updates. Its total is the sum of what Ombi counts (awaiting, approved, available, declined).
+
 ## Scene triggers
 
 - **New request**: someone requested a movie or a series. Filters: server,
@@ -87,6 +95,8 @@ it already knew is not announced again. A request or an issue created more than
 an hour before it is read (the integration was stopped) is not announced as
 new; an arrival always is.
 
+Ombi sends the same three events, with the same information. Its issue kinds are the categories its administrator created: a category named after the video, the audio or the subtitles is recognised, any other one is passed on as "other".
+
 ## Scene actions
 
 They need **Allow approving and declining**; otherwise they fail with a
@@ -100,6 +110,8 @@ message saying where to turn it on.
 
 Results passed on to the next actions: whether a request was found (none
 awaiting is not an error), its title, its requester, movie or series.
+
+On Ombi, the actions approve or deny the request through its API, as its interface does; a denied request can be approved later.
 
 ## Widget
 
@@ -115,6 +127,8 @@ asking for a confirmation first.
 The posters come from the server itself (its image cache): neither your
 browser nor the integration contact TMDB.
 
+Ombi does not keep the posters (its interface loads them from TMDB): the requests of an Ombi show without poster.
+
 ## Scene examples
 
 - **Tell the requester**: trigger "Requested media available", requester
@@ -127,6 +141,8 @@ browser nor the integration contact TMDB.
   "Send a message" to the administrator with the title and the message.
 - **Morning summary**: every day at 8:00, send the value of "Requests awaiting
   approval" when it is above 0.
+
+The examples work the same with an Ombi: choose its device in the "Server" filter.
 
 ## API usage
 
@@ -143,6 +159,8 @@ browser nor the integration contact TMDB.
 - The integration keeps in `/data/seerr-state.json` the last request and issue
   numbers it saw and the requests waiting for their media. No password, no key.
 
+Ombi: the key travels in the `ApiKey` header. One reading = `/Request/count` and `/Issues/count`; when they move, and every 10 minutes, the 50 newest movie requests and the 50 newest series requests, and the issues. The titles come with the requests: Ombi is not asked for anything else.
+
 ## Troubleshooting
 
 - **"API key refused"**: copy the key again from Settings → General. A new key
@@ -157,6 +175,8 @@ browser nor the integration contact TMDB.
 - **No event**: the events concern what happens after the integration started;
   run **Test the connection** to see what the server answers. For more detail,
   set `LOG_LEVEL=debug` on the integration and read its logs.
+
+- **"no Ombi API at this address"** (Ombi): the address answers, but not with the Ombi API: check the port (3579 by default) and the URL base set in Ombi.
 
 ## Limits
 
@@ -173,3 +193,6 @@ browser nor the integration contact TMDB.
   never deletes anything. No other change is made to the server.
 - The requester filter compares the name exactly as Overseerr shows it.
 - Not affiliated with the Overseerr, Jellyseerr or Seerr projects.
+
+- Ombi: the 4K part of a movie request is not followed (only the regular request), no poster, no failed state, no update flag. Ombi answers "Request successfully deleted" when it denies a request: the request stays, denied.
+- Not affiliated with the Ombi project.

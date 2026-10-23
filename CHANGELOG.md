@@ -10,6 +10,16 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+### Added
+
+- Ombi v4, in a section of its own in the configuration: one device with the
+  requests awaiting approval, approved, available, the total, the open issues,
+  the last request and its author and the version; the same scene triggers
+  (new request, requested media available, new issue reported), the same scene
+  actions (approve or decline the latest request) and the same widget, its
+  requests shown without poster. Ombi has no failed state and no update flag:
+  its device has neither feature.
+
 ## [1.0.1] - 2026-10-14
 
 ### Added

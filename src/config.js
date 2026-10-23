@@ -7,11 +7,15 @@
 // its own slot (address, API key, name). The slot number is the device
 // identity: changing the address of a slot (an IP for a name, HTTP for HTTPS,
 // Overseerr for Seerr after a migration) keeps the device and its history.
+//
+// Plus one Ombi (its own API, src/ombi/client.js), in a section of its own:
+// internal slot 3, its device external id is its own (src/devices.js).
 // -----------------------------------------------------------------------------
 
 export const LANGUAGES = ['en', 'fr', 'de', 'es'];
 
 export const SLOTS = [1, 2];
+export const OMBI_SLOT = 3;
 
 // Refresh intervals offered in the configuration, in seconds.
 export const POLL_INTERVALS = ['30', '60', '120', '300', '600'];
@@ -23,6 +27,9 @@ export const DEFAULT_CONFIG = {
   server_2_url: '',
   server_2_api_key: '',
   server_2_name: '',
+  ombi_url: '',
+  ombi_api_key: '',
+  ombi_name: '',
   allow_self_signed: false,
   allow_approval: false,
   poll_interval: '60',
@@ -34,7 +41,7 @@ const MAX_NAME_LENGTH = 40;
 // Pages of the web interface: an address copied from the browser keeps its
 // URL base (a reverse proxy under /overseerr) and loses the page.
 const PAGES =
-  /\/(requests?|issues?|discover|movie|tv|collection|person|search|users?|profile|settings|login|setup|blacklist|blocklist|watchlist)(\/.*)?$/i;
+  /\/(requests?|requests-list|details|user-preferences|issues?|discover|movie|tv|collection|person|search|users?|profile|settings|login|setup|blacklist|blocklist|watchlist)(\/.*)?$/i;
 
 /**
  * Parse the address typed by the user into a base URL: a bare host or IP
@@ -67,7 +74,7 @@ export function parseServerUrl(raw) {
     return null;
   }
   const path = url.pathname
-    .replace(/\/api\/v1(\/.*)?$/i, '')
+    .replace(/\/api\/v[12](\/.*)?$/i, '')
     .replace(PAGES, '')
     .replace(/\/+$/, '');
   return `${url.origin}${path}`;
@@ -91,22 +98,27 @@ export function normalizeConfig(raw = {}) {
 
   const instances = [];
   const invalidSlots = [];
-  for (const slot of SLOTS) {
-    const typed = text(`server_${slot}_url`);
+  const servers = [
+    ...SLOTS.map((slot) => ({ slot, app: 'seerr', prefix: `server_${slot}` })),
+    { slot: OMBI_SLOT, app: 'ombi', prefix: 'ombi' },
+  ];
+  for (const { slot, app, prefix } of servers) {
+    const typed = text(`${prefix}_url`);
     if (!typed) {
       continue;
     }
     const url = parseServerUrl(typed);
-    const apiKey = text(`server_${slot}_api_key`);
+    const apiKey = text(`${prefix}_api_key`);
     if (!url || !apiKey) {
       invalidSlots.push(slot);
       continue;
     }
     instances.push({
       slot,
+      app,
       url,
       apiKey,
-      name: text(`server_${slot}_name`).slice(0, MAX_NAME_LENGTH) || null,
+      name: text(`${prefix}_name`).slice(0, MAX_NAME_LENGTH) || null,
     });
   }
 

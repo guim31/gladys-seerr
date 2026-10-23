@@ -23,6 +23,7 @@
 
 import { DEVICE_TRANSPORTS, createLogger } from '@gladysassistant/integration-sdk';
 import { ERROR_KINDS, SeerrClient } from './seerr/client.js';
+import { OmbiClient } from './ombi/client.js';
 import {
   MEDIA_TYPES,
   STATES,
@@ -39,6 +40,7 @@ import {
   buildDevice,
   deviceIds,
   featureValues,
+  appName,
   instanceName,
   slotOf,
 } from './devices.js';
@@ -93,6 +95,14 @@ const MAX_DETAILS = 300;
 const WAITING = new Set([STATES.PENDING, STATES.PROCESSING, STATES.PARTIAL]);
 // The states after which it never arrives (declined, failed, closed).
 const ENDED = new Set([STATES.DECLINED, STATES.FAILED, STATES.COMPLETED]);
+
+// Ombi's request ids follow neither each other nor time (src/ombi/client.js):
+// its requests are ordered, and told new, by their date.
+const byDate = (record) => record.client.idsInOrder === false;
+
+/** What tells a newer request: its id, or its date in milliseconds. */
+const sequence = (record, request) =>
+  byDate(record) ? Date.parse(request.createdAt) || 0 : request.id;
 
 const signature = (instance, allowSelfSigned) =>
   JSON.stringify([instance.url, instance.apiKey, allowSelfSigned]);
@@ -199,7 +209,7 @@ export class SeerrHub {
     return {
       instance,
       signature: signature(instance, this.config.allowSelfSigned),
-      client: new SeerrClient({
+      client: new (instance.app === 'ombi' ? OmbiClient : SeerrClient)({
         url: instance.url,
         apiKey: instance.apiKey,
         insecure: this.config.allowSelfSigned,
@@ -362,7 +372,7 @@ export class SeerrHub {
           client.requests(REQUEST_WINDOW),
           client.failedCount(),
         ]);
-        requests = parseRequests(page);
+        requests = parseRequests(page, byDate(record));
         failed = failedCount;
       }
       if (issuesDue) {
@@ -552,7 +562,7 @@ export class SeerrHub {
   async requestEvents(record, requests) {
     const cursor = this.cursor(record);
     const before = JSON.stringify(cursor);
-    const maxId = requests.reduce((max, request) => Math.max(max, request.id), 0);
+    const maxId = requests.reduce((max, request) => Math.max(max, sequence(record, request)), 0);
     if (!Number.isInteger(cursor.lastRequestId)) {
       cursor.lastRequestId = maxId;
       cursor.watch = requests.filter((r) => WAITING.has(r.state)).map((r) => r.id);
@@ -560,8 +570,8 @@ export class SeerrHub {
       return false;
     }
     const fresh = requests
-      .filter((request) => request.id > cursor.lastRequestId)
-      .sort((a, b) => a.id - b.id);
+      .filter((request) => sequence(record, request) > cursor.lastRequestId)
+      .sort((a, b) => sequence(record, a) - sequence(record, b) || a.id - b.id);
     cursor.lastRequestId = Math.max(cursor.lastRequestId, maxId);
 
     const watch = new Set(cursor.watch);
@@ -696,9 +706,11 @@ export class SeerrHub {
     const language = this.config.language;
     for (const issue of reported) {
       if (issue.message === undefined) {
-        // Overseerr leaves the comments out of the list.
+        // Overseerr leaves the comments out of the list, Ombi the reporter.
         try {
-          issue.message = parseIssue(await record.client.issue(issue.id))?.message ?? null;
+          const detail = parseIssue(await record.client.issue(issue.id));
+          issue.message = detail?.message ?? null;
+          issue.reportedBy ??= detail?.reportedBy ?? null;
         } catch (err) {
           if (!err.kind) {
             throw err;
@@ -894,7 +906,7 @@ export class SeerrHub {
     const found = await Promise.all(
       records.map(async (record) => {
         try {
-          return parseRequests(await record.client.pendingRequests(REQUEST_WINDOW))
+          return parseRequests(await record.client.pendingRequests(REQUEST_WINDOW), byDate(record))
             .filter((request) => request.state === STATES.PENDING)
             .filter((request) => !mediaType || request.mediaType === mediaType)
             .map((request) => ({ record, request }));
@@ -967,7 +979,10 @@ export class SeerrHub {
     }
     let request;
     try {
-      [request] = parseRequests({ results: [await record.client.request(requestId)] });
+      [request] = parseRequests(
+        { results: [await record.client.request(requestId)] },
+        byDate(record),
+      );
     } catch (err) {
       if (!err.kind) {
         throw err;
@@ -1000,7 +1015,7 @@ export class SeerrHub {
         }
         const { appTitle, version, counts, updateAvailable } = record.snapshot;
         const parts = [
-          text.ok(appTitle ?? 'Overseerr', version),
+          text.ok(appTitle ?? appName(record.instance), version),
           text.pending(counts.pending ?? 0),
           text.processing(counts.processing ?? 0),
         ];

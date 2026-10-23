@@ -19,6 +19,7 @@ const MAX_BODY_BYTES = 4 * 1024 * 1024;
  * @param {object} [options]
  * @param {string} [options.method]
  * @param {Record<string, string>} [options.headers]
+ * @param {object} [options.json] a JSON body (the commands of Ombi)
  * @param {boolean} [options.binary] answer the body as a Buffer
  * @param {boolean} [options.insecure] accept a certificate that does not verify (HTTPS only)
  * @param {number} [options.timeoutMs]
@@ -26,15 +27,27 @@ const MAX_BODY_BYTES = 4 * 1024 * 1024;
  */
 export function httpRequest(
   url,
-  { method = 'GET', headers = {}, binary = false, insecure = false, timeoutMs = 15_000 } = {},
+  {
+    method = 'GET',
+    headers = {},
+    binary = false,
+    insecure = false,
+    timeoutMs = 15_000,
+    json = undefined,
+  } = {},
 ) {
   const target = new URL(url);
   const isHttps = target.protocol === 'https:';
+  const payload = json === undefined ? null : Buffer.from(JSON.stringify(json));
   const requestHeaders = {
     accept: binary ? 'image/*' : 'application/json',
     ...headers,
-    // The approve and decline routes take no body.
-    ...(method === 'POST' ? { 'content-length': 0 } : {}),
+    // The approve and decline routes of Overseerr take no body, Ombi's a JSON one.
+    ...(payload
+      ? { 'content-type': 'application/json', 'content-length': payload.length }
+      : method === 'POST'
+        ? { 'content-length': 0 }
+        : {}),
   };
 
   return new Promise((resolve, reject) => {
@@ -74,6 +87,6 @@ export function httpRequest(
       request.destroy(error);
     });
     request.on('error', reject);
-    request.end();
+    request.end(payload ?? undefined);
   });
 }

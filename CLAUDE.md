@@ -34,12 +34,13 @@ pushing.
 ```
 index.js                          SDK wiring only: handlers registered before connect()
 src/app.js                        registers every SDK handler on the hub (shared with the tests)
-src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults), slots, URL parsing
+src/config.js                     DEFAULT_CONFIG (mirrors the manifest defaults), slots (Ombi: 3), URL parsing
 src/hub.js                        one record per server: timer, gated reads, states, scene events, commands
 src/devices.js                    one device per server: features, names (4 languages), external ids
 src/seerr/client.js               Overseerr/Jellyseerr/Seerr API v1 client (X-Api-Key), error kinds, posters
 src/seerr/model.js                pure parsers: counts, requests and their state, issues, TMDB details
 src/seerr/http.js                 the only network function (node:http/https), the test seam
+src/ombi/client.js                Ombi v4 client (ApiKey): same methods and answer shapes as SeerrClient
 src/widgets.js                    "Media requests" widget (list with posters, approve/decline buttons)
 src/scenes.js                     scene action handlers (manifest `scene_actions`)
 src/texts.js                      messages in en/fr/de/es
@@ -47,7 +48,7 @@ src/store.js                      /data/seerr-state.json: last request/issue see
 gladys-assistant-integration.json manifest: name, config_schema, actions, triggers, widget...
 docs/{en,fr,de,es}.md             user documentation, re-hosted by Gladys, same sections
 test/                             node --test, fake servers (test/helpers) + the SDK's fake Gladys
-test/real/                        optional test against a real server (npm run test:real)
+test/real/                        optional tests against a real server (npm run test:real; SEERR_URL, OMBI_URL)
 scripts/real/                     seeds a real Overseerr/Jellyseerr/Seerr in Docker for test:real
 scripts/probe.mjs                 read-only probe of a real server, through the client
 .github/scripts/release.mjs       release helpers (manifest bump, changelog), tested in test/
@@ -289,3 +290,43 @@ required`) ; route inconnue : 404 **en JSON** (pas « pas une API »). `/status`
   Le seam s'appelle `this.http`.
 - **Budget du widget** : 3 tuiles + liste + statut + légende + 2 boutons = 8. Une 4ᵉ tuile (« disponibles ») ferait
   jeter un bouton : les disponibles restent visibles par leur badge et sur l'appareil.
+
+## Ombi : propre à cette intégration (ajouté le 23/10/2026)
+
+- **Adaptateur, pas de second hub** : `OmbiClient` (`src/ombi/client.js`) étend `SeerrClient` et rend les réponses
+  d'Ombi sous la forme de celles d'Overseerr (`/request`, `/request/count`, `/issue`…). Le hub, l'appareil, le widget
+  et les scènes ne connaissent qu'une forme. Slot interne 3, section `ombi_*` de la configuration, appareil
+  `ombi:1` (identifiant propre, jamais `seerr:3`). Rien n'a changé pour les appareils Overseerr / Jellyseerr.
+- Vérifié le 23/10/2026 sur `lscr.io/linuxserver/ombi` (4.53.10), depuis le conteneur verrouillé de l'intégration
+  (`test/real/ombi.real.test.js`, `OMBI_WRITE=1`) : assistant de première configuration par
+  `POST /api/v1/Identity/Wizard`, jeton par `POST /api/v1/Token`, clé d'API dans `GET /api/v1/Settings/ombi`
+  (Bearer). Ombi atteint TMDB à chaque demande : il faut Internet au conteneur Ombi.
+- **En-tête `ApiKey`**. Mauvaise clé : 401 en texte (`Invalid API Key`). Route inconnue : **200 avec la page HTML**
+  de l'application (pas un 404) : « pas Ombi » se lit à l'absence de JSON (`not_ombi`). `/Request/count` répond même
+  sans clé.
+- **Les commandes répondent 200 même en échec**, avec `isError`/`errorMessage` (« Request does not exist ») :
+  vérifier le corps. Approuver : `POST /api/v1/Request/{movie,tv}/approve {id}` ; refuser :
+  `PUT /api/v1/Request/{movie,tv}/deny {id, reason}` (verbe PUT ; Ombi répond « Request successfully deleted »,
+  mais la demande reste, refusée). Approuver une demande refusée est accepté.
+- **Identifiants des demandes** : films et séries sont deux tables. Une demande de série (« child request ») reçoit
+  en 4.53 **l'id TMDB de la série** (1399 pour Game of Thrones) : les ids ne suivent ni l'ordre ni le temps. Le hub
+  ordonne et détecte les nouvelles demandes **par date** pour Ombi (`idsInOrder: false`, curseur en millisecondes) ;
+  les ids vus par le hub sont codés (film n → 2n, série n → 2n + 1). `GET /api/v1/Request/tv/:id` répond 500 et
+  `/movie/:id` vide : une demande se relit dans la liste.
+- **Listes** : `/api/v2/Requests/{movie,tv}/{n}/0/requestedDate/desc` (`{ collection, total }`), une entrée par
+  demande, avec titre, date de sortie et affiche (les séries via `parentRequest`) : pas d'appel TMDB. La v1
+  (`/api/v1/Request/movie`) renvoie tout, sans pagination.
+- **Compteurs** : `pending`, `approved` (hors disponibles), `available`, `denied` ; chaque demande comptée une fois,
+  le total est leur somme. Problèmes : `/Issues/count` → `pending`, `inProgress`, `resolved`. Pas d'état d'échec ni
+  d'indicateur de mise à jour (`/api/v1/Update/check` n'existe pas) : l'appareil Ombi n'a ni `failed` ni
+  `update_available`. Version : `GET /api/v1/Status/info` (chaîne JSON).
+- **Problèmes** : il faut les activer (Settings → Issues) et créer des catégories, au nom libre (reconnues : vidéo,
+  audio, sous-titres, sinon « other »). La liste `/api/v1/Issues` laisse `userReported` à null : le demandeur se lit
+  sur `/api/v1/Issues/:id` (le hub reprend désormais aussi `reportedBy` du détail).
+- **Séries disponibles** : épisodes de `seasonRequests[].episodes[].available` ; partielle dès un épisode, disponible
+  quand tous les épisodes demandés le sont (ou `available` de la demande, posé par « marquer disponible »).
+- **Demandes faites avec la clé d'API** : approuvées d'office, demandeur `Api`. Pour une demande en attente, il faut
+  un utilisateur sans auto-approbation (`POST /api/v1/Identity`, droits `RequestMovie`/`RequestTv`).
+- **Pas d'affiche** : Ombi ne garde pas les images (son interface les charge depuis TMDB) ; ne pas ajouter d'accès
+  TMDB depuis le conteneur (le transport resterait `local` à tort). Partie 4K des films (`has4KRequest`…) non suivie.
+- Les objets utilisateur d'Ombi contiennent `userAccessToken` : ne jamais les journaliser ; fixtures nettoyées.

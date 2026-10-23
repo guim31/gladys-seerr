@@ -15,7 +15,17 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { FakeSeerr, ONE, SERVER_2_URL, SERVER_URL, TWO, createWorld } from './helpers/world.js';
+import {
+  FakeOmbi,
+  FakeSeerr,
+  OMBI,
+  OMBI_URL,
+  ONE,
+  SERVER_2_URL,
+  SERVER_URL,
+  TWO,
+  createWorld,
+} from './helpers/world.js';
 
 const table = JSON.parse(
   await readFile(new URL('./fixtures/gladys-feature-table.json', import.meta.url), 'utf8'),
@@ -55,6 +65,21 @@ const scenarios = [
     }),
     count: 2,
   },
+  {
+    label: 'an Overseerr and an Ombi',
+    config: { ...ONE, ...OMBI },
+    servers: () => ({
+      [SERVER_URL]: new FakeSeerr({ app: 'overseerr' }),
+      [OMBI_URL]: new FakeOmbi(),
+    }),
+    count: 2,
+  },
+  ...['fr', 'de', 'es'].map((language) => ({
+    label: `${language} names, an Ombi`,
+    config: { ...OMBI, language },
+    servers: () => ({ [OMBI_URL]: new FakeOmbi() }),
+    count: 1,
+  })),
   ...['fr', 'de', 'es'].map((language) => ({
     label: `${language} names, one server down`,
     config: { ...TWO, server_2_url: OFFLINE_URL, server_2_name: 'Offline', language },

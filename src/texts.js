@@ -18,10 +18,10 @@ export const INIT_FAILED = {
 
 export const CONNECTION_TEXT = {
   noInstance: {
-    en: 'Enter the address and API key of your Overseerr or Jellyseerr in the configuration.',
-    fr: "Saisissez l'adresse et la clé d'API de votre Overseerr ou Jellyseerr dans la configuration.",
-    de: 'Gib die Adresse und den API-Schlüssel deines Overseerr oder Jellyseerr in der Konfiguration ein.',
-    es: 'Introduzca la dirección y la clave de API de su Overseerr o Jellyseerr en la configuración.',
+    en: 'Enter the address and API key of your Overseerr, Jellyseerr or Ombi in the configuration.',
+    fr: "Saisissez l'adresse et la clé d'API de votre Overseerr, Jellyseerr ou Ombi dans la configuration.",
+    de: 'Gib die Adresse und den API-Schlüssel deines Overseerr, Jellyseerr oder Ombi in der Konfiguration ein.',
+    es: 'Introduzca la dirección y la clave de API de su Overseerr, Jellyseerr u Ombi en la configuración.',
   },
   invalid: {
     en: 'A server is incomplete: address (e.g. http://192.168.1.2:5055) and API key.',
@@ -56,6 +56,12 @@ export const ERROR_TEXT = {
     fr: 'aucune API Overseerr ou Jellyseerr à cette adresse',
     de: 'keine Overseerr- oder Jellyseerr-API unter dieser Adresse',
     es: 'no hay ninguna API de Overseerr o Jellyseerr en esta dirección',
+  },
+  [ERROR_KINDS.NOT_OMBI]: {
+    en: 'no Ombi API at this address',
+    fr: 'aucune API Ombi à cette adresse',
+    de: 'keine Ombi-API unter dieser Adresse',
+    es: 'no hay ninguna API de Ombi en esta dirección',
   },
   [ERROR_KINDS.REDIRECT]: {
     en: 'the address redirects: enter the final address, with its URL base',
@@ -106,10 +112,10 @@ export const REPORT_TEXT = {
 // Errors of the scene actions and widget buttons (shown in Gladys).
 export const ACTION_TEXT = {
   noInstance: {
-    en: 'No Overseerr or Jellyseerr is configured.',
-    fr: "Aucun Overseerr ni Jellyseerr n'est configuré.",
-    de: 'Kein Overseerr oder Jellyseerr ist konfiguriert.',
-    es: 'No hay ningún Overseerr ni Jellyseerr configurado.',
+    en: 'No Overseerr, Jellyseerr or Ombi is configured.',
+    fr: "Aucun Overseerr, Jellyseerr ni Ombi n'est configuré.",
+    de: 'Kein Overseerr, Jellyseerr oder Ombi ist konfiguriert.',
+    es: 'No hay ningún Overseerr, Jellyseerr ni Ombi configurado.',
   },
   unknownInstance: {
     en: 'This server is no longer in the configuration.',
