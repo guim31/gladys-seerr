@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-10-23
+
 ### Added
 
 - Ombi v4, in a section of its own in the configuration: one device with the
@@ -40,5 +42,6 @@ the notes of the version's GitHub Release.
   interval from 30 seconds to 10 minutes.
 - English, French, German and Spanish texts and documentation.
 
-[Unreleased]: https://github.com/guim31/gladys-seerr/compare/v1.0.1...HEAD
+[Unreleased]: https://github.com/guim31/gladys-seerr/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/guim31/gladys-seerr/compare/v1.0.1...v1.1.0
 [1.0.1]: https://github.com/guim31/gladys-seerr/releases/tag/v1.0.1
