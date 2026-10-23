@@ -225,6 +225,18 @@ export class OmbiClient extends SeerrClient {
     this.known = new Map();
   }
 
+  /** Ombi refuses a key in plain text: a JSON refusal is another application. */
+  async send(url, options) {
+    const answer = await super.send(url, options);
+    if (
+      (answer.status === 401 || answer.status === 403) &&
+      String(answer.headers?.['content-type'] ?? '').includes('json')
+    ) {
+      throw new SeerrError(ERROR_KINDS.NOT_OMBI, 'Another API than Ombi answers here');
+    }
+    return answer;
+  }
+
   async call(path, options) {
     let answer;
     try {
@@ -284,12 +296,16 @@ export class OmbiClient extends SeerrClient {
     return issueCount(await this.call('Issues/count'));
   }
 
-  /** The newest movie and series requests, merged, newest first. */
-  async requests(take) {
+  /**
+   * The newest movie and series requests, merged, newest first.
+   * @param {number} take
+   * @param {string} [filter] '' (every state) or 'pending/' (awaiting approval)
+   */
+  async requests(take, filter = '') {
     const count = Math.min(Number(take), LIST_TAKE);
     const [movies, series] = await Promise.all([
-      this.call(`v2/Requests/movie/${count}/0/requestedDate/desc`),
-      this.call(`v2/Requests/tv/${count}/0/requestedDate/desc`),
+      this.call(`v2/Requests/movie/${filter}${count}/0/requestedDate/desc`),
+      this.call(`v2/Requests/tv/${filter}${count}/0/requestedDate/desc`),
     ]);
     const results = [];
     for (const [page, mediaType, map] of [
@@ -312,9 +328,9 @@ export class OmbiClient extends SeerrClient {
     return { pageInfo: { results: total }, results: results.slice(0, count) };
   }
 
-  /** The caller keeps the requests awaiting approval. */
+  /** The newest requests awaiting approval (filtered by Ombi, as Overseerr does). */
   pendingRequests(take) {
-    return this.requests(take);
+    return this.requests(take, 'pending/');
   }
 
   /** Ombi has no failed state. */

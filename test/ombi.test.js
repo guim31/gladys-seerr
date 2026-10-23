@@ -278,3 +278,49 @@ test('the application name of Ombi names its device', async (t) => {
   await later(w, 61 * 60_000);
   assert.equal(w.fake.discoveredDevices.at(-1).name, 'Family requests 192.0.2.40:3579');
 });
+
+test('a request listed late (the other list was read first) is still announced', async (t) => {
+  const w = await world(t);
+  w.ombi.addSeries({ tmdbId: 1396, title: 'Breaking Bad', requestedDate: '2026-10-23T13:16:30Z' });
+  await later(w);
+  // Saved by Ombi after the series, dated before it.
+  w.ombi.addMovie({
+    id: 4,
+    tmdbId: 157336,
+    title: 'Interstellar',
+    requestedDate: '2026-10-23T13:16:00Z',
+  });
+  await later(w);
+  await later(w, 11 * 60_000);
+  assert.deepEqual(
+    events(w, TRIGGERS.REQUEST_CREATED).map(({ data }) => data.title),
+    ['Breaking Bad', 'Interstellar'],
+  );
+});
+
+test('the latest pending request is found behind 50 newer approved ones', async (t) => {
+  const w = await world(t, { config: { ...OMBI, allow_approval: true } });
+  w.ombi.addMovie({
+    id: 4,
+    tmdbId: 157336,
+    title: 'Interstellar',
+    requestedDate: '2026-10-23T13:16:00Z',
+  });
+  for (let i = 0; i < 55; i += 1) {
+    w.ombi.addMovie({
+      id: 10 + i,
+      tmdbId: 1000 + i,
+      title: `Movie ${i}`,
+      requestedDate: new Date(Date.parse('2026-10-23T13:17:00Z') + i * 1000).toISOString(),
+    });
+    w.ombi.movies[0].approved = true;
+  }
+  await later(w);
+  const result = await SCENE_ACTIONS.approve_latest_request(w.hub, { fields: {} });
+  assert.equal(result.title, 'Interstellar');
+});
+
+test('an Overseerr address in the Ombi section: not Ombi, not a key problem', async (t) => {
+  const w = await world(t, { servers: { [OMBI_URL]: new FakeSeerr({ apiKey: 'ombi-key' }) } });
+  assert.equal(w.hub.records.get(3).error.kind, ERROR_KINDS.NOT_OMBI);
+});

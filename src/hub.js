@@ -104,6 +104,9 @@ const byDate = (record) => record.client.idsInOrder === false;
 const sequence = (record, request) =>
   byDate(record) ? Date.parse(request.createdAt) || 0 : request.id;
 
+// How far back a request listed late is still announced (Ombi).
+const DATE_MARGIN_MS = 5 * 60_000;
+
 const signature = (instance, allowSelfSigned) =>
   JSON.stringify([instance.url, instance.apiKey, allowSelfSigned]);
 
@@ -563,16 +566,35 @@ export class SeerrHub {
     const cursor = this.cursor(record);
     const before = JSON.stringify(cursor);
     const maxId = requests.reduce((max, request) => Math.max(max, sequence(record, request)), 0);
+    // By date (Ombi), a request may be listed after a newer one (the two
+    // lists are read apart, Ombi saves a request after asking TMDB): the
+    // requests of the last minutes stay candidates, those already seen there
+    // are kept apart so none is announced twice.
+    const margin = byDate(record) ? DATE_MARGIN_MS : 0;
+    const recentIds = (since) =>
+      margin
+        ? requests.filter((r) => sequence(record, r) > since - margin).map((r) => r.id)
+        : undefined;
     if (!Number.isInteger(cursor.lastRequestId)) {
       cursor.lastRequestId = maxId;
       cursor.watch = requests.filter((r) => WAITING.has(r.state)).map((r) => r.id);
+      if (margin) {
+        cursor.recent = recentIds(maxId);
+      }
       this.store.save(this.saved);
       return false;
     }
+    const seen = new Set(cursor.recent ?? []);
     const fresh = requests
-      .filter((request) => sequence(record, request) > cursor.lastRequestId)
+      .filter(
+        (request) =>
+          sequence(record, request) > cursor.lastRequestId - margin && !seen.has(request.id),
+      )
       .sort((a, b) => sequence(record, a) - sequence(record, b) || a.id - b.id);
     cursor.lastRequestId = Math.max(cursor.lastRequestId, maxId);
+    if (margin) {
+      cursor.recent = recentIds(cursor.lastRequestId);
+    }
 
     const watch = new Set(cursor.watch);
     for (const request of fresh) {
@@ -638,6 +660,8 @@ export class SeerrHub {
   async seriesArrived(record, request) {
     if (
       request.mediaType !== MEDIA_TYPES.TV ||
+      // Ombi's lists carry the episodes: a complete series is already "available".
+      byDate(record) ||
       record.checked.get(request.id) === request.mediaStamp
     ) {
       return false;

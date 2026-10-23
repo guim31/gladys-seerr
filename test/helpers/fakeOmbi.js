@@ -145,13 +145,11 @@ export class FakeOmbi {
         resolved: this.issueList.filter((issue) => issue.status === 2).length,
       });
     }
-    if (
-      (match = /^\/api\/v2\/Requests\/(movie|tv)\/(\d+)\/0\/requestedDate\/desc$/.exec(pathname))
-    ) {
-      return json(
-        200,
-        this.page(match[1] === 'movie' ? this.movies : this.series, Number(match[2])),
-      );
+    const route = /^\/api\/v2\/Requests\/(movie|tv)\/(pending\/)?(\d+)\/0\/requestedDate\/desc$/;
+    if ((match = route.exec(pathname))) {
+      const list = match[1] === 'movie' ? this.movies : this.series;
+      const pending = (r) => !r.approved && r.denied !== true && !r.available;
+      return json(200, this.page(match[2] ? list.filter(pending) : list, Number(match[3])));
     }
     if (pathname === '/api/v1/Issues') {
       return json(200, clone(this.issueList));

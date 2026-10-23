@@ -315,7 +315,14 @@ required`) ; route inconnue : 404 **en JSON** (pas « pas une API »). `/status`
   `/movie/:id` vide : une demande se relit dans la liste.
 - **Listes** : `/api/v2/Requests/{movie,tv}/{n}/0/requestedDate/desc` (`{ collection, total }`), une entrée par
   demande, avec titre, date de sortie et affiche (les séries via `parentRequest`) : pas d'appel TMDB. La v1
-  (`/api/v1/Request/movie`) renvoie tout, sans pagination.
+  (`/api/v1/Request/movie`) renvoie tout, sans pagination. Les demandes en attente se lisent filtrées par Ombi :
+  `/api/v2/Requests/{movie,tv}/pending/{n}/0/requestedDate/desc` (vérifié), pour que les actions trouvent une
+  demande en attente derrière 50 demandes approuvées d'office.
+- **Détection par date avec marge** : les deux listes sont lues séparément et Ombi enregistre une demande après
+  l'appel à TMDB, donc une demande peut apparaître après une plus récente. Les demandes des 5 dernières minutes
+  restent candidates ; les ids déjà vus dans cette marge sont gardés dans `cursor.recent` (`seerr-state.json`, slot
+  3 seulement). Un Overseerr saisi dans la section Ombi répond un 401 **JSON** : traduit en `not_ombi`, pas en « clé
+  refusée ».
 - **Compteurs** : `pending`, `approved` (hors disponibles), `available`, `denied` ; chaque demande comptée une fois,
   le total est leur somme. Problèmes : `/Issues/count` → `pending`, `inProgress`, `resolved`. Pas d'état d'échec ni
   d'indicateur de mise à jour (`/api/v1/Update/check` n'existe pas) : l'appareil Ombi n'a ni `failed` ni
