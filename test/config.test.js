@@ -54,7 +54,13 @@ test('a server needs an address and a key; a half-filled slot is reported', () =
     language: 'de',
   });
   assert.deepEqual(config.instances, [
-    { slot: 1, url: 'http://192.0.2.10:5055', apiKey: 'key-1', name: 'Jellyseerr du salon' },
+    {
+      slot: 1,
+      app: 'seerr',
+      url: 'http://192.0.2.10:5055',
+      apiKey: 'key-1',
+      name: 'Jellyseerr du salon',
+    },
   ]);
   assert.deepEqual(config.invalidSlots, [2]);
   assert.equal(config.allowApproval, true);

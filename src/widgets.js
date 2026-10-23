@@ -36,10 +36,10 @@ const POSTER_KEY = /^poster-(\d)-(movie|tv)-(\d{1,10})$/;
 
 export const TEXT = {
   pick: {
-    en: 'Enter the address and API key of your Overseerr or Jellyseerr in the configuration of the integration.',
-    fr: "Saisissez l'adresse et la clé d'API de votre Overseerr ou Jellyseerr dans la configuration de l'intégration.",
-    de: 'Gib die Adresse und den API-Schlüssel deines Overseerr oder Jellyseerr in der Konfiguration der Integration ein.',
-    es: 'Introduzca la dirección y la clave de API de su Overseerr o Jellyseerr en la configuración de la integración.',
+    en: 'Enter the address and API key of your Overseerr, Jellyseerr or Ombi in the configuration of the integration.',
+    fr: "Saisissez l'adresse et la clé d'API de votre Overseerr, Jellyseerr ou Ombi dans la configuration de l'intégration.",
+    de: 'Gib die Adresse und den API-Schlüssel deines Overseerr, Jellyseerr oder Ombi in der Konfiguration der Integration ein.',
+    es: 'Introduzca la dirección y la clave de API de su Overseerr, Jellyseerr u Ombi en la configuración de la integración.',
   },
   unknown: {
     en: 'This server is no longer in the configuration: choose another one in the widget settings.',

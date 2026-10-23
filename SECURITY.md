@@ -35,7 +35,7 @@ What the integration handles:
 - **Secrets**: the API keys of the servers are `secret` fields of the Gladys
   configuration. The integration reads them from Gladys at startup, keeps them
   in memory, sends them only to the server they belong to (in the `X-Api-Key`
-  header, never in a URL), and never writes them to `/data` nor to the logs. An
+  header, `ApiKey` for Ombi, never in a URL), and never writes them to `/data` nor to the logs. An
   API key acts as the administrator of its server.
 - **Stored in `/data`**: `seerr-state.json`, per server its address, the
   numbers of the newest request and issue seen and the numbers of the requests

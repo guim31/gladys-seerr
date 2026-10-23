@@ -1,4 +1,4 @@
-# Overseerr / Jellyseerr
+# Overseerr / Jellyseerr / Ombi
 
 Siga en Gladys las solicitudes de películas y series de su hogar: lo que espera
 su aprobación, lo que se está descargando, lo que acaba de llegar a la
@@ -14,6 +14,8 @@ sí; esta sigue las solicitudes de sus usuarios.
 > Sonarr, Radarr y Gladys juntos): comentarios bienvenidos en
 > [GitHub](https://github.com/guim31/gladys-seerr/issues).
 
+**Ombi** (v4) también es compatible, con su propia API: un Ombi junto a uno o dos servidores Overseerr, Jellyseerr o Seerr. Probada con un Ombi 4.53.10 real.
+
 ## Requisitos
 
 - Gladys Assistant 5.1.0 o posterior.
@@ -22,9 +24,11 @@ sí; esta sigue las solicitudes de sus usuarios.
 - Su clave de API: en la interfaz web, **Settings → General → API Key**. La
   clave actúa como el administrador del servidor: guárdela para usted.
 
+- Para **Ombi**: Ombi v4, su dirección (puerto 3579 por defecto) y su clave de API, en **Settings → Ombi → API Key**. También actúa como un administrador.
+
 ## Configuración
 
-Integraciones → Overseerr / Jellyseerr → Configuración:
+Integraciones → Overseerr / Jellyseerr / Ombi → Configuración:
 
 - **Dirección**: la dirección IP o el nombre del servidor con su puerto, y su
   base de URL si está detrás de un proxy inverso
@@ -51,6 +55,8 @@ Integraciones → Overseerr / Jellyseerr → Configuración:
 Después, en la pestaña **Descubrir**, añada a Gladys el dispositivo de cada
 servidor.
 
+La sección **Ombi (opcional)** tiene los mismos tres campos (dirección, clave de API, nombre) para un Ombi v4.
+
 ## Dispositivo
 
 Un dispositivo por servidor, de solo lectura:
@@ -71,6 +77,8 @@ Un dispositivo por servidor, de solo lectura:
 
 Los contadores guardan su historial: un gráfico de las solicitudes pendientes
 muestra cuánto tiempo espera su familia.
+
+El dispositivo **Ombi** tiene las mismas funciones, salvo **Solicitudes fallidas** y **Actualización disponible**: Ombi no tiene estado de fallo y no anuncia sus actualizaciones. Su total es la suma de lo que Ombi cuenta (pendientes, aprobadas, disponibles, rechazadas).
 
 ## Disparadores de escena
 
@@ -93,6 +101,8 @@ que ya conocía no se vuelve a anunciar. Una solicitud o un problema creado más
 de una hora antes de su lectura (la integración estaba detenida) no se anuncia
 como nuevo; una llegada siempre.
 
+Ombi envía los mismos tres eventos, con la misma información. Sus tipos de problema son las categorías creadas por su administrador: se reconoce una categoría que nombre el vídeo, el audio o los subtítulos, cualquier otra se transmite como «otro».
+
 ## Acciones de escena
 
 Necesitan **Permitir aprobar y rechazar**; si no, fallan con un mensaje que
@@ -107,6 +117,8 @@ indica dónde activarlo.
 Resultados transmitidos a las acciones siguientes: si se encontró una solicitud
 (que no haya ninguna pendiente no es un error), su título, su solicitante,
 película o serie.
+
+En Ombi, las acciones aprueban o rechazan la solicitud mediante su API, como su interfaz; una solicitud rechazada puede aprobarse más tarde.
 
 ## Widget
 
@@ -123,6 +135,8 @@ uno pidiendo antes una confirmación.
 Los pósteres vienen del propio servidor (su caché de imágenes): ni su
 navegador ni la integración contactan con TMDB.
 
+Ombi no guarda los pósteres (su interfaz los carga desde TMDB): las solicitudes de un Ombi se muestran sin póster.
+
 ## Ejemplos de escenas
 
 - **Avisar al solicitante**: disparador «Solicitud disponible», solicitante
@@ -136,6 +150,8 @@ navegador ni la integración contactan con TMDB.
   mensaje.
 - **Resumen matinal**: cada día a las 8:00, enviar el valor de «Solicitudes
   pendientes de aprobación» cuando sea mayor que 0.
+
+Los ejemplos funcionan igual con un Ombi: elija su dispositivo en el filtro «Servidor».
 
 ## Uso de la API
 
@@ -154,6 +170,8 @@ navegador ni la integración contactan con TMDB.
   solicitud y de problema vistos y las solicitudes que esperan su medio. Ni
   contraseña ni clave.
 
+Ombi: la clave viaja en la cabecera `ApiKey`. Una lectura = `/Request/count` y `/Issues/count`; cuando cambian, y cada 10 minutos, las 50 solicitudes de películas y las 50 de series más recientes, y los problemas. Los títulos llegan con las solicitudes: no se pide nada más a Ombi.
+
 ## Solución de problemas
 
 - **«clave de API rechazada»**: vuelva a copiar la clave desde Settings →
@@ -170,6 +188,8 @@ navegador ni la integración contactan con TMDB.
   de la integración; ejecute **Probar la conexión** para ver lo que responde el
   servidor. Para más detalle, configure `LOG_LEVEL=debug` en la integración y
   lea sus registros.
+
+- **«no hay ninguna API de Ombi en esta dirección»** (Ombi): la dirección responde, pero no con la API de Ombi: compruebe el puerto (3579 por defecto) y la base de URL configurada en Ombi.
 
 ## Limitaciones
 
@@ -189,3 +209,6 @@ navegador ni la integración contactan con TMDB.
 - El filtro por solicitante compara el nombre exactamente como lo muestra
   Overseerr.
 - Sin relación con los proyectos Overseerr, Jellyseerr o Seerr.
+
+- Ombi: no se sigue la parte 4K de una solicitud de película (solo la solicitud normal), sin póster, sin estado de fallo, sin indicador de actualización. Ombi responde «Request successfully deleted» cuando rechaza una solicitud: la solicitud permanece, rechazada.
+- Sin relación con el proyecto Ombi.

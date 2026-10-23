@@ -1,12 +1,12 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Overseerr / Jellyseerr",
+  "name": "Overseerr / Jellyseerr / Ombi",
   "description": {
-    "en": "Movie and series requests of Overseerr, Jellyseerr or Seerr: approvals, arrivals, issues.",
-    "fr": "Demandes de films et séries Overseerr, Jellyseerr ou Seerr : approbations, arrivées, problèmes.",
-    "de": "Film- und Serienanfragen von Overseerr, Jellyseerr oder Seerr: Freigaben, Eingänge, Probleme.",
-    "es": "Solicitudes de películas y series de Overseerr, Jellyseerr o Seerr: aprobaciones, llegadas."
+    "en": "Movie and series requests of Overseerr, Jellyseerr, Seerr or Ombi: approvals, arrivals, issues.",
+    "fr": "Demandes de films/séries Overseerr, Jellyseerr, Seerr ou Ombi : approbations, arrivées, problèmes.",
+    "de": "Film- und Serienanfragen von Overseerr, Jellyseerr, Seerr oder Ombi: Freigaben, Eingänge, Probleme.",
+    "es": "Solicitudes de películas y series de Overseerr, Jellyseerr, Seerr u Ombi: aprobaciones, llegadas."
   },
   "version": "1.0.1",
   "docker_image": "ghcr.io/guim31/gladys-seerr:1.0.1",
@@ -184,6 +184,87 @@
         "fr": "ex. Jellyseerr",
         "de": "z. B. Jellyseerr",
         "es": "p. ej. Jellyseerr"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "ombi",
+      "type": "section",
+      "label": {
+        "en": "Ombi (optional)",
+        "fr": "Ombi (facultatif)",
+        "de": "Ombi (optional)",
+        "es": "Ombi (opcional)"
+      },
+      "description": {
+        "en": "Address and API key of your Ombi v4 (Settings → Ombi → API Key).",
+        "fr": "Adresse et clé d'API de votre Ombi v4 (Settings → Ombi → API Key).",
+        "de": "Adresse und API-Schlüssel deines Ombi v4 (Settings → Ombi → API Key).",
+        "es": "Dirección y clave de API de su Ombi v4 (Settings → Ombi → API Key)."
+      }
+    },
+    {
+      "key": "ombi_url",
+      "type": "string",
+      "label": {
+        "en": "Address",
+        "fr": "Adresse",
+        "de": "Adresse",
+        "es": "Dirección"
+      },
+      "description": {
+        "en": "IP address or name with the port, and the URL base if any (e.g. http://192.168.1.2:3579).",
+        "fr": "Adresse IP ou nom avec le port, et la base d'URL s'il y en a une (ex. http://192.168.1.2:3579).",
+        "de": "IP-Adresse oder Name mit Port und ggf. URL-Basis (z. B. http://192.168.1.2:3579).",
+        "es": "Dirección IP o nombre con el puerto, y la base de URL si la hay (p. ej. http://192.168.1.2:3579)."
+      },
+      "placeholder": {
+        "en": "e.g. 192.168.1.2:3579",
+        "fr": "ex. 192.168.1.2:3579",
+        "de": "z. B. 192.168.1.2:3579",
+        "es": "p. ej. 192.168.1.2:3579"
+      },
+      "required": false,
+      "default": ""
+    },
+    {
+      "key": "ombi_api_key",
+      "type": "secret",
+      "label": {
+        "en": "API key",
+        "fr": "Clé d'API",
+        "de": "API-Schlüssel",
+        "es": "Clave de API"
+      },
+      "description": {
+        "en": "Settings → Ombi → API Key. It acts as an administrator of Ombi.",
+        "fr": "Settings → Ombi → API Key. Elle agit comme un administrateur d'Ombi.",
+        "de": "Settings → Ombi → API Key. Er handelt als Administrator von Ombi.",
+        "es": "Settings → Ombi → API Key. Actúa como un administrador de Ombi."
+      },
+      "required": false
+    },
+    {
+      "key": "ombi_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom",
+        "de": "Name",
+        "es": "Nombre"
+      },
+      "description": {
+        "en": "Name of the device in Gladys. Empty: Ombi followed by the address.",
+        "fr": "Nom de l'appareil dans Gladys. Vide : Ombi suivi de l'adresse.",
+        "de": "Name des Geräts in Gladys. Leer: Ombi, gefolgt von der Adresse.",
+        "es": "Nombre del dispositivo en Gladys. Vacío: Ombi seguido de la dirección."
+      },
+      "placeholder": {
+        "en": "e.g. Ombi",
+        "fr": "ex. Ombi",
+        "de": "z. B. Ombi",
+        "es": "p. ej. Ombi"
       },
       "required": false,
       "default": ""
@@ -471,10 +552,10 @@
             "es": "Solicitado por (vacío: cualquiera)"
           },
           "description": {
-            "en": "The name the user has in Overseerr, exactly as it shows there.",
-            "fr": "Le nom de l'utilisateur dans Overseerr, exactement comme il s'y affiche.",
-            "de": "Der Name des Benutzers in Overseerr, genau wie er dort angezeigt wird.",
-            "es": "El nombre del usuario en Overseerr, tal como aparece allí."
+            "en": "The name the user has in Overseerr or Ombi, exactly as it shows there.",
+            "fr": "Le nom de l'utilisateur dans Overseerr ou Ombi, exactement comme il s'y affiche.",
+            "de": "Der Name des Benutzers in Overseerr oder Ombi, genau wie er dort angezeigt wird.",
+            "es": "El nombre del usuario en Overseerr u Ombi, tal como aparece allí."
           }
         }
       ],
@@ -637,10 +718,10 @@
             "es": "Solicitado por (vacío: cualquiera)"
           },
           "description": {
-            "en": "The name the user has in Overseerr, exactly as it shows there.",
-            "fr": "Le nom de l'utilisateur dans Overseerr, exactement comme il s'y affiche.",
-            "de": "Der Name des Benutzers in Overseerr, genau wie er dort angezeigt wird.",
-            "es": "El nombre del usuario en Overseerr, tal como aparece allí."
+            "en": "The name the user has in Overseerr or Ombi, exactly as it shows there.",
+            "fr": "Le nom de l'utilisateur dans Overseerr ou Ombi, exactement comme il s'y affiche.",
+            "de": "Der Name des Benutzers in Overseerr oder Ombi, genau wie er dort angezeigt wird.",
+            "es": "El nombre del usuario en Overseerr u Ombi, tal como aparece allí."
           }
         }
       ],

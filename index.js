@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// Entry point: wires the Gladys SDK to the Overseerr / Jellyseerr hub
+// Entry point: wires the Gladys SDK to the Overseerr / Jellyseerr / Ombi hub
 // (src/app.js). No device logic here. Handlers are registered before connect().
 //
 // Environment provided by the Gladys supervisor: GLADYS_HOST_API_URL,
@@ -17,7 +17,7 @@ gladys.handleShutdown((signal) => {
   return app.stop(); // waits for the last write under /data
 });
 
-logger.info('Starting the Overseerr / Jellyseerr integration...');
+logger.info('Starting the Overseerr / Jellyseerr / Ombi integration...');
 gladys.connect().catch((err) => {
   logger.error('Initial connection failed', err);
   process.exit(1);

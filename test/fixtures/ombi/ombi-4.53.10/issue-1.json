@@ -1,0 +1,28 @@
+{
+  "title": "Fight Club",
+  "requestType": 1,
+  "providerId": "550",
+  "requestId": null,
+  "subject": "No sound",
+  "description": "The sound drops after ten minutes",
+  "issueCategoryId": 1,
+  "issueCategory": {
+    "value": "Audio",
+    "id": 1
+  },
+  "status": 0,
+  "resovledDate": null,
+  "createdDate": "2026-10-23T13:10:21.1672873Z",
+  "userReportedId": "00000000-0000-4000-8000-000000000001",
+  "userReported": {
+    "alias": "Alice",
+    "userType": 1,
+    "userAlias": "Alice",
+    "isSystemUser": false,
+    "id": "00000000-0000-4000-8000-000000000001",
+    "userName": "alice"
+  },
+  "comments": null,
+  "posterPath": null,
+  "id": 1
+}

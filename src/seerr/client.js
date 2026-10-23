@@ -16,6 +16,7 @@ export const ERROR_KINDS = Object.freeze({
   TLS: 'tls', // the certificate does not verify (self-signed without the option)
   AUTH: 'auth', // API key refused (401, 403)
   NOT_SEERR: 'not_seerr', // something answers, not an Overseerr/Jellyseerr API
+  NOT_OMBI: 'not_ombi', // something answers, not an Ombi API
   REDIRECT: 'redirect', // the address redirects (HTTP to HTTPS, a login page)
   HTTP: 'http', // any other HTTP error
 });
@@ -65,19 +66,22 @@ export class SeerrClient {
     this.url = url;
     this.apiKey = apiKey;
     this.insecure = insecure;
+    /** The header that carries the API key. */
+    this.keyHeader = 'X-Api-Key';
     // Not `this.request`: request(id) is a method.
     this.http = request;
     /** The image proxy route that answered last (index in POSTER_ROUTES). */
     this.posterRoute = 0;
   }
 
-  async send(url, { method = 'GET', binary = false, auth = true } = {}) {
+  async send(url, { method = 'GET', binary = false, auth = true, json } = {}) {
     try {
       return await this.http(url, {
         method,
         binary,
         insecure: this.insecure,
-        headers: auth ? { 'X-Api-Key': this.apiKey } : {},
+        headers: auth ? { [this.keyHeader]: this.apiKey } : {},
+        ...(json === undefined ? {} : { json }),
       });
     } catch (err) {
       if (TLS_CODES.has(err.code)) {
@@ -87,13 +91,16 @@ export class SeerrClient {
     }
   }
 
-  async call(path, { method = 'GET' } = {}) {
+  async call(path, { method = 'GET', json } = {}) {
+    // A path starting with `v2/` (Ombi's paged lists) leaves /api/v1.
+    const route = path.startsWith('v2/') ? `api/${path}` : `api/v1/${path}`;
     const {
       status,
       headers = {},
       body,
-    } = await this.send(`${this.url}/api/v1/${path}`, {
+    } = await this.send(`${this.url}/${route}`, {
       method,
+      json,
     });
     if (status === 401 || status === 403) {
       throw new SeerrError(ERROR_KINDS.AUTH, 'API key refused', { status });

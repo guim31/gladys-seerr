@@ -12,12 +12,21 @@ import { createFakeGladys } from '@gladysassistant/integration-sdk/testing';
 import { registerHandlers } from '../../src/app.js';
 import { Store } from '../../src/store.js';
 import { FakeSeerr, createNetwork } from './fakeSeerr.js';
+import { FakeOmbi } from './fakeOmbi.js';
 
 process.env.LOG_LEVEL ??= 'silent';
 process.env.TZ = 'Europe/Paris';
 
 export const SERVER_URL = 'http://192.0.2.10:5055';
 export const SERVER_2_URL = 'https://192.0.2.20/overseerr';
+export const OMBI_URL = 'http://192.0.2.40:3579';
+
+/** An Ombi alone, in its section of the configuration. */
+export const OMBI = {
+  ombi_url: OMBI_URL,
+  ombi_api_key: 'ombi-key',
+  language: 'en',
+};
 
 /** A manual clock, a few minutes after the requests of the real captures. */
 export function createClock(start = Date.parse('2026-10-14T19:30:00Z')) {
@@ -94,4 +103,8 @@ export const deviceId = (gladys, slot = 1) => gladys.externalIds('seerr', String
 export const featureId = (gladys, key, slot = 1) =>
   gladys.externalIds('seerr', String(slot)).feature(key);
 
-export { FakeSeerr };
+/** External id of the Ombi device, and of its features. */
+export const ombiDeviceId = (gladys) => gladys.externalIds('ombi', '1').device;
+export const ombiFeatureId = (gladys, key) => gladys.externalIds('ombi', '1').feature(key);
+
+export { FakeOmbi, FakeSeerr };

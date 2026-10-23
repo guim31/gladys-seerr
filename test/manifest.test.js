@@ -52,7 +52,7 @@ function isAtLeast(version, required) {
 }
 
 test('identity: name, image, cover, local transport, multimedia category', () => {
-  assert.equal(manifest.name, 'Overseerr / Jellyseerr');
+  assert.equal(manifest.name, 'Overseerr / Jellyseerr / Ombi');
   assert.ok(manifest.name.length >= 3 && manifest.name.length <= 30);
   assert.equal(manifest.type, 'device');
   assert.match(manifest.docker_image, /^ghcr\.io\/guim31\/gladys-seerr:/);

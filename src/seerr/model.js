@@ -159,13 +159,17 @@ export function parseRequest(raw) {
   };
 }
 
-/** A page of /request → the parsed requests, newest first. */
-export function parseRequests(page) {
+/**
+ * A page of /request → the parsed requests, newest first: by id, or by date
+ * when the ids do not follow time (Ombi, src/ombi/client.js).
+ */
+export function parseRequests(page, byDate = false) {
   const results = Array.isArray(page?.results) ? page.results : [];
+  const time = (request) => Date.parse(request.createdAt) || 0;
   return results
     .map(parseRequest)
     .filter(Boolean)
-    .sort((a, b) => b.id - a.id);
+    .sort((a, b) => (byDate ? time(b) - time(a) : 0) || b.id - a.id);
 }
 
 /**

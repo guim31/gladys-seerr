@@ -1,5 +1,5 @@
 // -----------------------------------------------------------------------------
-// One Gladys device per configured server (Overseerr, Jellyseerr or Seerr).
+// One Gladys device per configured server (Overseerr, Jellyseerr, Seerr or Ombi).
 //
 // Identity: the configuration slot (1, 2), not the address: moving a server to
 // another host, behind a reverse proxy, or migrating Overseerr to Seerr keeps
@@ -15,14 +15,17 @@
 //   - last_request, last_requester: title and author of the newest request;
 //   - version: text/text; update_available: input/binary.
 //
+// Ombi has no failed state and no update flag: its device has neither feature.
+//
 // should_poll: false: the integration reads the servers on its own timer
 // (src/hub.js), at the interval chosen in the configuration.
 // -----------------------------------------------------------------------------
 
 import { DEVICE_FEATURE_CATEGORIES, DEVICE_FEATURE_TYPES } from '@gladysassistant/integration-sdk';
-import { SLOTS, hostOf } from './config.js';
+import { OMBI_SLOT, SLOTS, hostOf } from './config.js';
 
 export const DEVICE_TYPE = 'seerr';
+export const OMBI_DEVICE_TYPE = 'ombi';
 export const URL_PARAM = 'SEERR_URL';
 
 // Suffixes of the feature external ids: permanent once published.
@@ -169,13 +172,26 @@ const FEATURES = [
   binary(K.UPDATE_AVAILABLE, (snapshot) => bit(snapshot.updateAvailable)),
 ];
 
-/** External ids of a server's device and features. */
-export const deviceIds = (gladys, slot) => gladys.externalIds(DEVICE_TYPE, String(slot));
+// The features Ombi cannot fill (src/ombi/client.js).
+const NOT_OMBI = new Set([K.FAILED, K.UPDATE_AVAILABLE]);
+const featuresOf = (slot) =>
+  slot === OMBI_SLOT ? FEATURES.filter(({ key }) => !NOT_OMBI.has(key)) : FEATURES;
+
+/** External ids of a server's device and features (`ombi:1` for the Ombi). */
+export const deviceIds = (gladys, slot) =>
+  slot === OMBI_SLOT
+    ? gladys.externalIds(OMBI_DEVICE_TYPE, '1')
+    : gladys.externalIds(DEVICE_TYPE, String(slot));
 
 /** The slot of a device external id, null when it is not one of ours. */
 export function slotOf(gladys, externalId) {
-  return SLOTS.find((slot) => deviceIds(gladys, slot).device === externalId) ?? null;
+  return (
+    [...SLOTS, OMBI_SLOT].find((slot) => deviceIds(gladys, slot).device === externalId) ?? null
+  );
 }
+
+/** The application of a server, before it tells its title. */
+export const appName = (instance) => (instance.app === 'ombi' ? 'Ombi' : 'Overseerr');
 
 /**
  * The name shown for a server: the one typed in the configuration, else the
@@ -185,7 +201,7 @@ export function slotOf(gladys, externalId) {
  * @param {string|null} [appTitle]
  */
 export const instanceName = (instance, appTitle = null) =>
-  instance.name ?? `${appTitle ?? 'Overseerr'} ${hostOf(instance.url)}`.slice(0, 60);
+  instance.name ?? `${appTitle ?? appName(instance)} ${hostOf(instance.url)}`.slice(0, 60);
 
 /**
  * The discovery payload of a server.
@@ -202,7 +218,7 @@ export function buildDevice(gladys, instance, appTitle, language = 'en') {
     external_id: ids.device,
     should_poll: false,
     params: [{ name: URL_PARAM, value: instance.url }],
-    features: FEATURES.map(({ key, definition }) => ({
+    features: featuresOf(instance.slot).map(({ key, definition }) => ({
       ...definition,
       name: names[key],
       external_id: ids.feature(key),
@@ -216,7 +232,7 @@ export function buildDevice(gladys, instance, appTitle, language = 'en') {
  */
 export function featureValues(gladys, slot, snapshot) {
   const ids = deviceIds(gladys, slot);
-  return FEATURES.map(({ key, value, text: isText = false }) => ({
+  return featuresOf(slot).map(({ key, value, text: isText = false }) => ({
     key,
     externalId: ids.feature(key),
     value: value(snapshot),
